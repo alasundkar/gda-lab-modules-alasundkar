@@ -6,6 +6,7 @@ The code in this repository is largely comprised of shell classes that are desig
 ## How to use this repository
 If you're reading [Programming the Internet of Things: An Introduction to Building Integrated, Device to Cloud IoT Solutions](https://learning.oreilly.com/library/view/programming-the-internet/9781492081401), you'll see a tie-in with the exercises described in each chapter and this repository. Most of the code in the main src tree is NOT implemented by design. It's intended for you - as the reader of my book (and possibly a student in one of my IoT courses) - to implement by filling in the implementation details as you work through each exercise.
 
+
 A solution set is available, although I haven't yet released it. Stay tuned for updates on this topic.
 
 ## This repository aligns to exercises Programming the Internet of Things
