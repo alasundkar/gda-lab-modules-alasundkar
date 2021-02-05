@@ -30,6 +30,10 @@ public class SystemCpuUtilTask extends BaseSystemUtilTask
 	
 	
 	// protected methods
+	/**
+	 * returns float value of Memory utilization
+	 * 
+	 */
 	
 	@Override
 	protected float getSystemUtil()

@@ -16,6 +16,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import programmingtheiot.data.SensorData;
@@ -81,6 +82,7 @@ public class SystemCpuUtilTaskTest
 	 * Test method for {@link programmingtheiot.gda.system.SystemCpuUtilTask#generateTelemetry()}.
 	 */
 	@Test
+	@Ignore
 	public void testGenerateTelemetry()
 	{
 		SensorData sd = this.cpuUtilTask.generateTelemetry();
