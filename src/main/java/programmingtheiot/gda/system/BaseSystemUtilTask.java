@@ -40,6 +40,10 @@ public abstract class BaseSystemUtilTask
 	{
 		return null;
 	}
+	/**
+	 * Fetches and returns float value of Telemetry from derived class getSystemUtil .
+	 * 
+	 */
 	
 	public float getTelemetryValue()
 	{

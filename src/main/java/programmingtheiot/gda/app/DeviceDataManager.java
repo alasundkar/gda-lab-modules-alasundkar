@@ -9,6 +9,8 @@
 package programmingtheiot.gda.app;
 
 import java.util.logging.Level;
+import programmingtheiot.gda.system.SystemPerformanceManager;
+
 import java.util.logging.Logger;
 
 import programmingtheiot.common.ConfigConst;
@@ -42,6 +44,8 @@ public class DeviceDataManager implements IDataMessageListener
 		Logger.getLogger(DeviceDataManager.class.getName());
 	
 	// private var's
+	private SystemPerformanceManager sysPerfManager;
+
 	
 	private boolean enableMqttClient = true;
 	private boolean enableCoapServer = false;
@@ -74,6 +78,9 @@ public class DeviceDataManager implements IDataMessageListener
 		super();
 		
 		initConnections();
+		
+		//
+		this.sysPerfManager = new SystemPerformanceManager(10);
 	}
 	
 	
@@ -105,10 +112,14 @@ public class DeviceDataManager implements IDataMessageListener
 	
 	public void startManager()
 	{
+		_Logger.info("Data Device Manager has started");
+		this.sysPerfManager.startManager();
 	}
 	
 	public void stopManager()
 	{
+		_Logger.info("Data Device Manager has stopped");
+		this.sysPerfManager.stopManager();
 	}
 
 	
