@@ -63,7 +63,9 @@ public class SystemPerformanceDataTest
 	{
 		SystemPerformanceData spd = new SystemPerformanceData();
 		
-		assertEquals(spd.getName(), ConfigConst.NOT_SET);
+		_Logger.info("Created data obj: " + spd.toString());
+		
+		assertEquals(spd.getName(), ConfigConst.SYS_PERF_DATA);
 		assertEquals(spd.getStatusCode(), SystemPerformanceData.DEFAULT_STATUS);
 		
 		assertTrue(spd.getCpuUtilization() == ConfigConst.DEFAULT_VAL);
@@ -75,6 +77,8 @@ public class SystemPerformanceDataTest
 	public void testParameterUpdates()
 	{
 		SystemPerformanceData spd = createTestData();
+		
+		_Logger.info("Created data obj: " + spd.toString());
 		
 		assertEquals(spd.getName(), DEFAULT_NAME);
 		assertEquals(spd.getStatusCode(), SystemPerformanceData.DEFAULT_STATUS);
@@ -88,9 +92,12 @@ public class SystemPerformanceDataTest
 	public void testFullUpdate()
 	{
 		SystemPerformanceData spd = new SystemPerformanceData();
+		_Logger.info("Created first data obj: " + spd.toString());
+		
 		SystemPerformanceData spd2 = createTestData();
-
-		assertEquals(spd.getName(), ConfigConst.NOT_SET);
+		_Logger.info("Created second data obj: " + spd2.toString());
+		
+		assertEquals(spd.getName(), ConfigConst.SYS_PERF_DATA);
 		assertEquals(spd.getStatusCode(), SystemPerformanceData.DEFAULT_STATUS);
 		
 		assertTrue(spd.getCpuUtilization() == ConfigConst.DEFAULT_VAL);
@@ -98,6 +105,7 @@ public class SystemPerformanceDataTest
 		assertTrue(spd.getMemoryUtilization() == ConfigConst.DEFAULT_VAL);
 		
 		spd.updateData(spd2);
+		_Logger.info("Updated second data obj: " + spd2.toString());
 		
 		assertEquals(spd.getName(), DEFAULT_NAME);
 		assertEquals(spd.getStatusCode(), SystemPerformanceData.DEFAULT_STATUS);

@@ -62,7 +62,7 @@ public class DataUtilTest
 		String jsonData = dataUtil.actuatorDataToJson(data);
 		
 		assertNotNull(jsonData);
-		
+				
 		ActuatorData data2 = dataUtil.jsonToActuatorData(jsonData);
 		
 		assertEquals(data.getName(), data2.getName());

@@ -28,7 +28,7 @@ public class GatewayDeviceApp
 	public static final long DEFAULT_TEST_RUNTIME = 60000L;
 	
 	// private var's
-	
+
 	
 	// constructors
 	
@@ -93,7 +93,7 @@ public class GatewayDeviceApp
 	
 	/**
 	 * Stops the application.
-	 * 
+	 *  
 	 * @param code The exit code to pass to {@link System.exit()}
 	 */
 	public void stopApp(int code)

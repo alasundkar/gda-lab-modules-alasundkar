@@ -82,14 +82,7 @@ public class DeviceDataManagerNoCommsTest
 	@Test
 	public void testStartAndStopManagerNoComms()
 	{
-		boolean enableMqtt = false;
-		boolean enableCoap = false;
-		boolean enableCloud = false;
-		boolean enableSmtp = false;
-		boolean enablePersistence = false;
-
-		DeviceDataManager devDataMgr =
-			new DeviceDataManager(enableMqtt, enableCoap, enableCloud, enableSmtp, enablePersistence);
+		DeviceDataManager devDataMgr = new DeviceDataManager();
 		
 		devDataMgr.startManager();
 		

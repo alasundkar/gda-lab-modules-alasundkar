@@ -16,7 +16,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import programmingtheiot.data.SensorData;
@@ -77,26 +76,6 @@ public class SystemCpuUtilTaskTest
 	}
 	
 	// test methods
-	
-	/**
-	 * Test method for {@link programmingtheiot.gda.system.SystemCpuUtilTask#generateTelemetry()}.
-	 */
-	@Test
-	@Ignore
-	public void testGenerateTelemetry()
-	{
-		SensorData sd = this.cpuUtilTask.generateTelemetry();
-		
-		assertNotNull(sd);
-		
-		float val = sd.getValue();
-		
-		if (val >= 0.0f) {
-			assertTrue(sd.getValue() >= 0.0f);
-		} else {
-			_Logger.info("CPU util not supported on this OS.");
-		}
-	}
 	
 	/**
 	 * Test method for {@link programmingtheiot.gda.system.SystemCpuUtilTask#getTelemetryValue()}.

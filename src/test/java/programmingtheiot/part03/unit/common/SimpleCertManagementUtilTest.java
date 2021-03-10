@@ -41,7 +41,7 @@ public class SimpleCertManagementUtilTest
 	 * the @Test annotation before {@link #testImportOfCertFromValidFile}
 	 * to test.
 	 */
-	public static final String DIR_PREFIX = "./src/test/java/programmingtheiot/unit/common/";
+	public static final String DIR_PREFIX = "./src/test/java/programmingtheiot/part03/unit/common/";
 	
 	public static final String TEST_VALID_CERT_FILE    = DIR_PREFIX + "test_cert_validA.pem";
 	public static final String TEST_INVALID_CERT_FILEA = DIR_PREFIX + "test_cert_emptyA.pem";
