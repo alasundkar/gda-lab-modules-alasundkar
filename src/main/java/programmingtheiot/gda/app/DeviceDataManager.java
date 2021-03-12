@@ -8,6 +8,7 @@
 
 package programmingtheiot.gda.app;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +21,7 @@ import programmingtheiot.data.ActuatorData;
 import programmingtheiot.data.DataUtil;
 import programmingtheiot.data.SensorData;
 import programmingtheiot.data.SystemPerformanceData;
+import programmingtheiot.data.SystemStateData;
 
 import programmingtheiot.gda.connection.CloudClientConnector;
 import programmingtheiot.gda.connection.CoapServerGateway;
@@ -29,6 +31,7 @@ import programmingtheiot.gda.connection.IRequestResponseClient;
 import programmingtheiot.gda.connection.MqttClientConnector;
 import programmingtheiot.gda.connection.RedisPersistenceAdapter;
 import programmingtheiot.gda.connection.SmtpClientConnector;
+import programmingtheiot.gda.system.SystemPerformanceManager;
 
 /**
  * Shell representation of class for student implementation.
@@ -57,10 +60,21 @@ public class DeviceDataManager implements IDataMessageListener
 	
 	// constructors
 	
+	SystemPerformanceManager sysPerfMgr = new SystemPerformanceManager();
+
+	/**
+	 * Default
+	 */
+	
 	public DeviceDataManager()
 	{
 		super();
-		
+		ConfigUtil configUtil = new ConfigUtil();
+		this.enableMqttClient  = configUtil .getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_MQTT_CLIENT_KEY);
+		this.enableCoapServer  = configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_COAP_SERVER_KEY);
+		this.enableCloudClient = configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_CLOUD_CLIENT_KEY);
+		this.enableSmtpClient  = configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_SMTP_CLIENT_KEY);
+		this.enablePersistenceClient = configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_PERSISTENCE_CLIENT_KEY);
 		initConnections();
 	}
 	
@@ -82,19 +96,119 @@ public class DeviceDataManager implements IDataMessageListener
 	@Override
 	public boolean handleActuatorCommandResponse(ResourceNameEnum resourceName, ActuatorData data)
 	{
-		return false;
+
+		_Logger.info("handleActuatorCommandResponse has been initiated...");
+		
+		/*
+		 * Checking if persistent connection is active.
+		 */
+		if (enablePersistenceClient == true)
+		{
+			_Logger.info("Persistent connection is active");
+			persistenceClient.storeData(resourceName.getResourceName(), ConfigConst.DEFAULT_QOS, data);
+		}
+		
+		/*
+		 * Checking if Actuator Data message has error.
+		 */
+		if (data.hasError() == true)
+		{
+			try
+			{
+				_Logger.info("Actuator data has error");
+			} catch (Exception e) 
+			{
+				_Logger.info(e.getMessage());
+			}
+			return false;
+		}
+		
+		return true;
 	}
 
 	@Override
 	public boolean handleIncomingMessage(ResourceNameEnum resourceName, String msg)
 	{
-		return false;
+		_Logger.info("handleIncomingMessage has bee initiated...");
+
+		/*
+		 * Creating DataUtil instance 'dataUtil' to convert JSON Data to Actuator Data or System State Data.
+		 */
+		DataUtil dataUtil = new DataUtil();
+		
+		try
+		{
+			/*
+			 * Converting JSON Data to Actuator Data.
+			 */
+			ActuatorData message = dataUtil.jsonToActuatorData(msg);
+			handleIncomingDataAnalysis(resourceName, message);
+		} 
+		catch (Exception e)
+		{
+			/*
+			 * Converting JSON Data to System State Data.
+			 */
+			SystemStateData message = dataUtil.jsonToSystemStateData(msg);
+			handleIncomingDataAnalysis(resourceName, message);
+		}
+		
+		return true;
+		}
+
+	
+	/**
+	 * Call to handle Incoming data analysis.
+	 */
+	private void handleIncomingDataAnalysis(ResourceNameEnum resourceName, SystemStateData message) {
+		
+		// TODO Auto-generated method stub
+		_Logger.info("handleIncomingDataAnalysis has been initiated..");
 	}
 
+	/**
+	 * Call to handle Incoming data analysis.
+	 */
+	private void handleIncomingDataAnalysis(ResourceNameEnum resourceName, ActuatorData message) {
+		
+		// TODO Auto-generated method stub
+		_Logger.info("handleIncomingDataAnalysis has been initiated..");
+	}
+	
+	
+	
+	
 	@Override
 	public boolean handleSensorMessage(ResourceNameEnum resourceName, SensorData data)
 	{
-		return false;
+		_Logger.info("handleSensorMessage has been initiated...");
+		
+		/*
+		 * Checking if Persistence Client is active.
+		 */
+		if (enablePersistenceClient == true)
+		{
+			_Logger.info("Persistence Client is active");
+			persistenceClient.storeData(resourceName.getResourceName(), ConfigConst.DEFAULT_QOS, data);
+		}
+		
+		DataUtil dataUtil = new DataUtil();
+		String message = dataUtil.sensorDataToJson(data);
+
+//		handleUpstreamTransmission(resourceName, message);
+		
+
+//			Properties prop = readPropertiesFile("PiotConfig.props");
+			
+		//	if(Float.valueOf(message) < Float.valueOf(prop.getProperty("humiditySimFloor")) ||
+			//		Float.valueOf(message) > Float.valueOf(prop.getProperty("humiditySimCeiling"))) {
+				
+				ActuatorData actuatorData = new ActuatorData();
+				actuatorData.setValue(Float.valueOf(message));
+				actuatorData.setCommand(ActuatorData.COMMAND_ON);
+				mqttClient.publishMessage(resourceName, message, 1);
+
+		return true;
 	}
 
 	@Override
@@ -102,13 +216,101 @@ public class DeviceDataManager implements IDataMessageListener
 	{
 		return false;
 	}
-	
+	private boolean handleUpstreamTransmission(ResourceNameEnum resourceName, String jsonData, int qos) {
+		_Logger.fine("Persistence Client is active");
+		return true;
+	}
 	public void startManager()
 	{
+		_Logger.info("DeviceDataManager has been initialized...");
+		
+		/*
+		 * Establishing MQTT Client Connection.
+		 */
+		if (enableMqttClient == true)
+		{
+			MqttClientConnector mqttClient1 = new MqttClientConnector();
+			mqttClient1.connectClient();
+		}
+		
+		/*
+		 * Establishing persistent connection.
+		 */
+		if (enablePersistenceClient == true)
+		{
+			RedisPersistenceAdapter persistenceClient1 = new RedisPersistenceAdapter();
+			persistenceClient1.connectClient();
+		}
+		
+		/*
+		 * Establishing connection to the cloud.
+		 */
+		if (enableCloudClient == true)
+		{
+			CloudClientConnector cloudClient1 = new CloudClientConnector();
+			cloudClient1.connectClient();
+		}
+		
+		/*
+		 * Initializing the CoAP Server.
+		 */
+		if (enableCoapServer == true)
+		{
+			CoapServerGateway coapServer1 = new CoapServerGateway();
+			coapServer1.startServer();
+		}
+		
+		/*
+		 * Initializing System Performance Manager.
+		 */
+	  
+	  this.sysPerfMgr.startManager();
 	}
-	
+		
 	public void stopManager()
 	{
+		_Logger.info("DeviceDataManager was stopped..");
+		
+		/*
+		 * Terminating MQTT Client Connection.
+		 */
+		if (enableMqttClient == true)
+		{
+			MqttClientConnector mqttClient1 = new MqttClientConnector();
+			mqttClient1.disconnectClient();
+		}
+		
+		/*
+		 * Terminating persistent connection.
+		 */
+		if (enablePersistenceClient == true)
+		{
+			RedisPersistenceAdapter persistenceClient1 = new RedisPersistenceAdapter();
+			persistenceClient1.disconnectClient();
+		}
+		
+		/*
+		 * Terminating connection to the cloud.
+		 */
+		if (enableCloudClient == true)
+		{
+			CloudClientConnector cloudClient1 = new CloudClientConnector();
+			cloudClient1.disconnectClient();
+		}
+		
+		/*
+		 * Stopping the CoAP Server.
+		 */
+		if (enableCoapServer == true)
+		{
+			CoapServerGateway coapServer1 = new CoapServerGateway();
+			coapServer1.stopServer();
+		}
+		
+		/*
+		 * Stopping System Performance Manager.
+		 */	  
+	  this.sysPerfMgr.stopManager();
 	}
 
 	
@@ -122,5 +324,12 @@ public class DeviceDataManager implements IDataMessageListener
 	private void initConnections()
 	{
 	}
+	private void initManager(){  
+		this.sysPerfMgr = new SystemPerformanceManager();  
+		this.sysPerfMgr.setDataMessageListener(this);    
+
+	}
+	
+	
 	
 }

@@ -56,7 +56,7 @@ public class ConfigUtil
 	 * 
 	 * Creates a new instance of {@link HierarchichalINIConfiguration}.
 	 */
-	private ConfigUtil()
+	public ConfigUtil()
 	{
 		super();
 		

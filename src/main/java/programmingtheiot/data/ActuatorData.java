@@ -19,12 +19,13 @@ import programmingtheiot.common.ConfigConst;
 public class ActuatorData extends BaseIotData implements Serializable
 {
 	// static
-	
-	
-	// private var's
-	
-    
-    
+
+	public static final int COMMAND_ON = 0;
+	// private var's	
+	private int command;
+	private String stateData;
+	private float value = 0.0f;
+	private int actuatorType;
 	// constructors
 	
 	/**
@@ -35,18 +36,27 @@ public class ActuatorData extends BaseIotData implements Serializable
 	{
 		super();
 	}
-	
+	public ActuatorData(int actuatorType) {
+		super();
+		this.setActuatorType(actuatorType);
+	}	
 	
 	// public methods
 	
 	public int getCommand()
 	{
-		return 0;
+		return this.command;
+	}
+
+	public String getStateData()
+	{
+		return this.stateData;
 	}
 	
 	public float getValue()
 	{
-		return 0.0f;
+		//return 0.0f;
+		return this.value;
 	}
 	
 	public boolean isResponseFlagEnabled()
@@ -56,12 +66,37 @@ public class ActuatorData extends BaseIotData implements Serializable
 	
 	public void setCommand(int command)
 	{
+		this.command = command;
+	}
+	
+	
+	/**
+	 * Get Actuator type.
+	 * @return : Returns actuator type
+	 */
+	public int getActuatorType() {
+		return this.actuatorType;
+	}
+		
+	/**
+	 * Sets Actuator type
+	 * @param actuatorType : Contains value corresponding to the actuator.
+	 */
+	public void setActuatorType(int actuatorType)
+	{
+		this.actuatorType = actuatorType;
 	}
 	
 	public void setValue(float val)
 	{
+		super.updateTimeStamp();
+		this.value = val;
 	}
 	
+	public void setStateData(String stateData)
+	{
+		 this.stateData = stateData ;
+	}
 	/**
 	 * Returns a string representation of this instance. This will invoke the base class
 	 * {@link #toString()} method, then append the output from this call.
@@ -88,6 +123,16 @@ public class ActuatorData extends BaseIotData implements Serializable
 	 */
 	protected void handleUpdateData(BaseIotData data)
 	{
+		  if (data instanceof ActuatorData) {
+			    ActuatorData aData = (ActuatorData) data;
+			    this.setCommand(aData.getCommand());
+			    this.setValue(aData.getValue());
+			    this.setStateData(aData.getStateData());
+			    
+			  //  if (aData.isResponseFlagEnabled()) {
+			//      this.isResponseFlagEnabled() = true;
+			  //  }
+			  }
 	}
 	
 }

@@ -23,7 +23,7 @@ public class SensorData extends BaseIotData implements Serializable
 	
 	// private var's
 	
-    
+	private float value ;
 	// constructors
 	
 	public SensorData()
@@ -37,17 +37,25 @@ public class SensorData extends BaseIotData implements Serializable
 	}
 	
 	
+
 	// public methods
 	
+	/**
+	 * Returns the latest SenssorData value.
+	 */
 	public float getValue()
 	{
-		return 0.0f;
+		return this.value;
 	}
 	
+	/**
+	 * Modifies the value of SensorData.
+	 * @param val : Float
+	 */
 	public void setValue(float val)
 	{
-	}
-	
+		this.value = val;
+	}	
 	/**
 	 * Returns a string representation of this instance. This will invoke the base class
 	 * {@link #toString()} method, then append the output from this call.
@@ -72,6 +80,10 @@ public class SensorData extends BaseIotData implements Serializable
 	 */
 	protected void handleUpdateData(BaseIotData data)
 	{
+		  if (data instanceof SensorData) {
+			    SensorData sData = (SensorData) data;
+			    this.setValue(sData.getValue());
+			  }
 	}
 	
 }

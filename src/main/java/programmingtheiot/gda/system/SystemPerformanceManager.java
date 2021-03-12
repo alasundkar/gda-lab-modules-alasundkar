@@ -12,7 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import programmingtheiot.common.ConfigConst;
 import programmingtheiot.common.ConfigUtil;
 import programmingtheiot.common.IDataMessageListener;
@@ -26,7 +27,10 @@ import programmingtheiot.data.SystemPerformanceData;
 public class SystemPerformanceManager
 {
 	// private var's
-	
+	private SystemCpuUtilTask cpuUtilTask = null;
+	private SystemMemUtilTask memUtilTask = null;
+	private static final Logger _Logger = Logger.getLogger(BaseSystemUtilTask.class.getName());
+	private IDataMessageListener dataMsgListener;
 	
 	// constructors
 	
@@ -36,6 +40,8 @@ public class SystemPerformanceManager
 	 */
 	public SystemPerformanceManager()
 	{
+		this.cpuUtilTask = new SystemCpuUtilTask();
+		this.memUtilTask = new SystemMemUtilTask();
 	}
 	
 	
@@ -43,6 +49,22 @@ public class SystemPerformanceManager
 	
 	public void handleTelemetry()
 	{
+		float cpuUtil = this.cpuUtilTask.getTelemetryValue();
+		float memUtil = this.memUtilTask.getTelemetryValue();
+		_Logger.info("cpuUtilTask = " + cpuUtil);
+		_Logger.info("memUtilTask = " + memUtil);
+		
+		//_Logger.debug("CPU utilization: " + cpuUtil + ", Mem utilization: " + memUtil);
+		
+		SystemPerformanceData spd = new SystemPerformanceData();
+		//spd.setLocationID(this.locationID);
+		spd.setCpuUtilization(cpuUtil);
+		spd.setMemoryUtilization(memUtil);
+		
+		if (this.dataMsgListener != null) {
+			this.dataMsgListener.handleSystemPerformanceMessage(
+				ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE, spd);
+		}
 	}
 	
 	public void setDataMessageListener(IDataMessageListener listener)
