@@ -1,4 +1,5 @@
 /**
+
  * This class is part of the Programming the Internet of Things project.
  * 
  * It is provided as a simple shell to guide the student and assist with
