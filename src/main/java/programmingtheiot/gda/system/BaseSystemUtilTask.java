@@ -24,7 +24,8 @@ public abstract class BaseSystemUtilTask
 	
 	
 	// private
-	
+	private SensorData latestSensorData = null;
+
 	
 	// constructors
 	
@@ -38,12 +39,25 @@ public abstract class BaseSystemUtilTask
 	
 	public SensorData generateTelemetry()
 	{
-		return null;
+		SensorData sensorData = new SensorData();
+		SensorData latestSensorData = sensorData;
+		latestSensorData.setValue(getSystemUtil());
+		return latestSensorData;
 	}
 	
 	public float getTelemetryValue()
 	{
-		return 0.0f;
+		if(latestSensorData == null)
+		{
+			/*
+			 * Generate new telemetry if no telemetry found.
+			 */
+			generateTelemetry();
+		}
+		_Logger.info("The value is " + latestSensorData.getValue());
+		
+		return latestSensorData.getValue();
+		//return 0.0f;
 	}
 	
 	

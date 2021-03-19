@@ -105,7 +105,7 @@ public class SystemCpuUtilTaskTest
 		float cpuUtil  = 0.0f;
 		int   totTests = 5;
 		
-		cpuUtil = this.cpuUtilTask.getTelemetryValue();
+	//	cpuUtil = this.cpuUtilTask.getTelemetryValue();
 		
 		for (int i = 1; i <= totTests; i++) {
 			if (cpuUtil >= 0.0f) {

@@ -27,6 +27,10 @@ import programmingtheiot.data.SystemPerformanceData;
 public class SystemPerformanceManager
 {
 	// private var's
+	private int pollSecs = 30;
+	private ScheduledExecutorService schedExecSvc = null;
+	private Runnable taskRunner = null;
+	private boolean isStarted = false;
 	private SystemCpuUtilTask cpuUtilTask = null;
 	private SystemMemUtilTask memUtilTask = null;
 	private static final Logger _Logger = Logger.getLogger(BaseSystemUtilTask.class.getName());
@@ -40,10 +44,30 @@ public class SystemPerformanceManager
 	 */
 	public SystemPerformanceManager()
 	{
+		this(ConfigConst.DEFAULT_POLL_CYCLES);
+		
+		this.schedExecSvc = Executors.newScheduledThreadPool(1);
 		this.cpuUtilTask = new SystemCpuUtilTask();
 		this.memUtilTask = new SystemMemUtilTask();
+		this.taskRunner = () -> {
+		    this.handleTelemetry();
+		};
 	}
-	
+	/**
+	 * Constructor.
+	 * 
+	 * @param pollSecs The number of seconds between each scheduled task poll.
+	 */
+	public SystemPerformanceManager(int pollSecs)
+	{
+		/**
+		 * Check if pollSecs value lies between 1 and max value
+		 */
+		if(pollSecs>1 && pollSecs<Integer.MAX_VALUE)
+		{
+			this.pollSecs = pollSecs;
+		}
+	}	
 	
 	// public methods
 	
@@ -55,28 +79,39 @@ public class SystemPerformanceManager
 		_Logger.info("memUtilTask = " + memUtil);
 		
 		//_Logger.debug("CPU utilization: " + cpuUtil + ", Mem utilization: " + memUtil);
-		
-		SystemPerformanceData spd = new SystemPerformanceData();
-		//spd.setLocationID(this.locationID);
-		spd.setCpuUtilization(cpuUtil);
-		spd.setMemoryUtilization(memUtil);
-		
-		if (this.dataMsgListener != null) {
-			this.dataMsgListener.handleSystemPerformanceMessage(
-				ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE, spd);
-		}
+//		
+//		SystemPerformanceData spd = new SystemPerformanceData();
+//		//spd.setLocationID(this.locationID);
+//		spd.setCpuUtilization(cpuUtil);
+//		spd.setMemoryUtilization(memUtil);
+//		
+//		if (this.dataMsgListener != null) {
+//			this.dataMsgListener.handleSystemPerformanceMessage(
+//				ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE, spd);
+//		}
 	}
 	
 	public void setDataMessageListener(IDataMessageListener listener)
 	{
+		if (listener != null) {
+			this.dataMsgListener = listener;
+		}
 	}
 	
 	public void startManager()
 	{
+		if (! this.isStarted) {
+		    ScheduledFuture<?> futureTask = this.schedExecSvc.scheduleAtFixedRate(this.taskRunner, 0L, this.pollSecs, TimeUnit.SECONDS);
+
+		    this.isStarted = true;
+		}
+		_Logger.info("SystemPerformanceManager started");
 	}
 	
 	public void stopManager()
 	{
+		_Logger.info("SystemPerformanceManager stopped");
+		this.schedExecSvc.shutdown();	
 	}
 	
 }

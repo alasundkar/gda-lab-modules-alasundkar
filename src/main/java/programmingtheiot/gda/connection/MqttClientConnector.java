@@ -131,6 +131,8 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 
 	public boolean isConnected()
 	{
+		if(mqttClient.isConnected())
+			return true;
 		return false;
 	}
 	
