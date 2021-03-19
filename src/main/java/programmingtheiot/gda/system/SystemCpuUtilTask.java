@@ -9,6 +9,7 @@
 package programmingtheiot.gda.system;
 
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryUsage;
 
 
 /**
@@ -34,7 +35,16 @@ public class SystemCpuUtilTask extends BaseSystemUtilTask
 	@Override
 	protected float getSystemUtil()
 	{
-		return (float) ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
+		return 0.0f;
+		//return (float) ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
 	}
-	
+	public float getTelemetryValue()
+	{
+		MemoryUsage memUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
+        double memUtil = ((double) memUsage.getUsed() / (double) memUsage.getMax()) * 100.0d;
+       
+     //   _Logger.info("memory utilization GDA::    " + memUtil);
+       
+        return (float)memUtil;
+	}
 }

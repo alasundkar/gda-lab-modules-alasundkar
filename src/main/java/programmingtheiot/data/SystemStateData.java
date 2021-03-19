@@ -25,16 +25,16 @@ import programmingtheiot.common.ConfigConst;
 public class SystemStateData extends BaseIotData implements Serializable
 {
 	// static
-	
-	
+
+
 	// private var's
 	private int command = ConfigConst.DEFAULT_COMMAND;
 	private List<SystemPerformanceData> sysPerfDataList = null;
 	private List<SensorData> sensorDataList = null;
-    
-    
+
+
 	// constructors
-	
+
 	/**
 	 * Default.
 	 * 
@@ -42,46 +42,56 @@ public class SystemStateData extends BaseIotData implements Serializable
 	public SystemStateData()
 	{
 		super();
-		
+
 		super.setName(ConfigConst.SYS_STATE_DATA);
-		
+
 		this.sysPerfDataList = new ArrayList<>();
 		this.sensorDataList  = new ArrayList<>();
 	}
-	
-	
+
+
 	// public methods
-	
+
 	public boolean addSensorData(SensorData data)
 	{
+
+		if (data != null) {
+			this.sensorDataList.add(data);
+			return true;
+			}
 		return false;
 	}
-	
+
 	public boolean addSystemPerformanceData(SystemPerformanceData data)
 	{
-		
+
+		if (data != null) {
+			this.sysPerfDataList.add(data);
+			return true;
+			}
 		return false;
 	}
-	
+
 	public int getCommand()
 	{
-		return 0;
+		return this.command;
 	}
-	
+
 	public List<SensorData> getSensorDataList()
 	{
-		return null;
+		return this.sensorDataList;
 	}
-	
+
 	public List<SystemPerformanceData> getSystemPerformanceDataList()
 	{
-		return null;
+		return this.sysPerfDataList;
 	}
-	
+
 	public void setCommand(int actionCmd)
 	{
+		this.command = actionCmd;
 	}
-	
+
 	/**
 	 * Returns a string representation of this instance. This will invoke the base class
 	 * {@link #toString()} method, then append the output from this call.
@@ -91,18 +101,18 @@ public class SystemStateData extends BaseIotData implements Serializable
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder(super.toString());
-		
+
 		sb.append(',');
 		sb.append(ConfigConst.COMMAND_PROP).append('=').append(this.getCommand()).append(',');
 		sb.append(ConfigConst.SENSOR_DATA_LIST_PROP).append('=').append(this.getSensorDataList()).append(',');
 		sb.append(ConfigConst.SYSTEM_PERF_DATA_LIST_PROP).append('=').append(this.getSystemPerformanceDataList());
-		
+
 		return sb.toString();
 	}
-	
-	
+
+
 	// protected methods
-	
+
 	/* (non-Javadoc)
 	 * @see programmingtheiot.data.BaseIotData#handleUpdateData(programmingtheiot.data.BaseIotData)
 	 */
@@ -112,5 +122,5 @@ public class SystemStateData extends BaseIotData implements Serializable
 		this.setStatusCode(data.getStatusCode());
 
 	}
-	
+
 }

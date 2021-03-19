@@ -111,7 +111,7 @@ public class SystemStateDataTest
 		
 		assertEquals(ssd.getName(), DEFAULT_NAME);
 		assertEquals(ssd.getStatusCode(), DEFAULT_STATUS_CODE);
-		assertTrue(ssd.getCommand() == DEFAULT_ACTION_CMD);
+		assertTrue(ssd.getCommand() == ConfigConst.DEFAULT_COMMAND);
 		
 		List<SensorData> sdList = ssd.getSensorDataList();
 		

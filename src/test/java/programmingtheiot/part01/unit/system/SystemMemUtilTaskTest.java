@@ -105,7 +105,7 @@ public class SystemMemUtilTaskTest
 		float memUtil  = 0.0f;
 		int   totTests = 5;
 		
-	//	memUtil = this.memUtilTask.getTelemetryValue();
+		memUtil = this.memUtilTask.getTelemetryValue();
 		
 		for (int i = 1; i <= totTests; i++) {
 			if (memUtil >= 0.0f) {
