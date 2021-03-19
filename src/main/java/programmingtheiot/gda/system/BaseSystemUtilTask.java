@@ -8,6 +8,8 @@
 
 package programmingtheiot.gda.system;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryUsage;
 import java.util.logging.Logger;
 
 import programmingtheiot.data.SensorData;
@@ -24,7 +26,8 @@ public abstract class BaseSystemUtilTask
 	
 	
 	// private
-	
+	private SensorData latestSensorData = null;
+
 	
 	// constructors
 	
@@ -38,13 +41,15 @@ public abstract class BaseSystemUtilTask
 	
 	public SensorData generateTelemetry()
 	{
-		return null;
+		SensorData sensorData = new SensorData();
+		SensorData latestSensorData = sensorData;
+		latestSensorData.setValue(getSystemUtil());
+		return latestSensorData;
+		//return sensorData;
 	}
 	
-	public float getTelemetryValue()
-	{
-		return 0.0f;
-	}
+	public abstract float getTelemetryValue();
+	
 	
 	
 	// protected methods
