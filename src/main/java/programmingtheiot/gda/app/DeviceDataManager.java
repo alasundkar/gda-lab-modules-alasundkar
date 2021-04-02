@@ -35,9 +35,10 @@ import programmingtheiot.gda.system.SystemPerformanceManager;
 
 /**
  * Shell representation of class for student implementation.
+ * @param <IActuatorDataListener>
  *
  */
-public class DeviceDataManager implements IDataMessageListener
+public class DeviceDataManager<IActuatorDataListener> implements IDataMessageListener
 {
 	// static
 	
@@ -57,6 +58,7 @@ public class DeviceDataManager implements IDataMessageListener
 	private IPersistenceClient persistenceClient = null;
 	private IRequestResponseClient smtpClient = null;
 	private CoapServerGateway coapServer = null;
+	public String IActuatorDataListener ;
 	
 	// constructors
 	
@@ -92,6 +94,9 @@ public class DeviceDataManager implements IDataMessageListener
 	
 	
 	// public methods
+	public void setActuatorDataListener(String name, IActuatorDataListener listener) {
+		
+	}
 	
 	@Override
 	public boolean handleActuatorCommandResponse(ResourceNameEnum resourceName, ActuatorData data)

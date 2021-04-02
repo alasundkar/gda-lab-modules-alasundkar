@@ -85,13 +85,10 @@ public class CoapServerGatewayTest
 	public void testRunSimpleCoapServerGatewayIntegration()
 	{
 		try {
-			String url =
-				ConfigConst.DEFAULT_COAP_PROTOCOL + "://" + ConfigConst.DEFAULT_HOST + ":" + ConfigConst.DEFAULT_COAP_PORT;
+			String url = "coap://localhost:5683";
 			
-			this.csg = new CoapServerGateway(USE_DEFAULT_RESOURCES);
+			this.csg = new CoapServerGateway(); // assumes the no-arg constructor will create all resources internally
 			this.csg.startServer();
-			
-			Thread.sleep(5000);
 			
 			CoapClient clientConn = new CoapClient(url);
 			
@@ -103,36 +100,65 @@ public class CoapServerGatewayTest
 				}
 			}
 			
-			clientConn.setURI(
-				url + "/" + ConfigConst.PRODUCT_NAME);
-			clientConn.get();
-			
-			clientConn.setURI(
-				url + "/" + ConfigConst.PRODUCT_NAME + "/" + ConfigConst.CONSTRAINED_DEVICE);
-			clientConn.get();
-			
-			clientConn.setURI(
-				url + "/" + ConfigConst.PRODUCT_NAME + "/" + ConfigConst.GATEWAY_DEVICE);
-			clientConn.get();
-			
-			clientConn.setURI(
-				url + "/" + ResourceNameEnum.GDA_MGMT_STATUS_CMD_RESOURCE.getResourceName());
-			clientConn.get();
-			
-			clientConn.setURI(
-				url + "/" + ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE.getResourceName());
-			clientConn.get();
-			
-			clientConn.setURI(
-				url + "/" + ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName());
-			clientConn.get();
-			
-			Thread.sleep(DEFAULT_TIMEOUT);
+			Thread.sleep(DEFAULT_TIMEOUT); // DEFAULT_TIMEOUT is in milliseconds - for instance, 120000 (2 minutes)
 			
 			this.csg.stopServer();
 		} catch (Exception e) {
-			// ignore
+			// log a message!
 		}
 	}
+//	@Test
+//	public void testRunSimpleCoapServerGatewayIntegration()
+//	{
+//		try {
+//			String url =
+//				ConfigConst.DEFAULT_COAP_PROTOCOL + "://" + ConfigConst.DEFAULT_HOST + ":" + ConfigConst.DEFAULT_COAP_PORT;
+//			
+//			this.csg = new CoapServerGateway(USE_DEFAULT_RESOURCES);
+//			this.csg.startServer();
+//			
+//			Thread.sleep(5000);
+//			
+//			CoapClient clientConn = new CoapClient(url);
+//			
+//			Set<WebLink> wlSet = clientConn.discover();
+//				
+//			if (wlSet != null) {
+//				for (WebLink wl : wlSet) {
+//					_Logger.info(" --> WebLink: " + wl.getURI() + ". Attributes: " + wl.getAttributes());
+//				}
+//			}
+//			
+//			clientConn.setURI(
+//				url + "/" + ConfigConst.PRODUCT_NAME);
+//			clientConn.get();
+//			
+//			clientConn.setURI(
+//				url + "/" + ConfigConst.PRODUCT_NAME + "/" + ConfigConst.CONSTRAINED_DEVICE);
+//			clientConn.get();
+//			
+//			clientConn.setURI(
+//				url + "/" + ConfigConst.PRODUCT_NAME + "/" + ConfigConst.GATEWAY_DEVICE);
+//			clientConn.get();
+//			
+//			clientConn.setURI(
+//				url + "/" + ResourceNameEnum.GDA_MGMT_STATUS_CMD_RESOURCE.getResourceName());
+//			clientConn.get();
+//			
+//			clientConn.setURI(
+//				url + "/" + ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE.getResourceName());
+//			clientConn.get();
+//			
+//			clientConn.setURI(
+//				url + "/" + ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName());
+//			clientConn.get();
+//			
+//			Thread.sleep(DEFAULT_TIMEOUT);
+//			
+//			this.csg.stopServer();
+//		} catch (Exception e) {
+//			// ignore
+//		}
+//	}
 	
 }
