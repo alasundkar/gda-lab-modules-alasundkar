@@ -87,7 +87,7 @@ public class CoapServerGatewayTest
 		try {
 			String url = "coap://localhost:5683";
 			
-			this.csg = new CoapServerGateway(); // assumes the no-arg constructor will create all resources internally
+			this.csg = new CoapServerGateway(USE_DEFAULT_RESOURCES); // assumes the no-arg constructor will create all resources internally
 			this.csg.startServer();
 			
 			CoapClient clientConn = new CoapClient(url);
@@ -107,13 +107,18 @@ public class CoapServerGatewayTest
 			// log a message!
 		}
 	}
+	
+	
+	
+	
 //	@Test
 //	public void testRunSimpleCoapServerGatewayIntegration()
 //	{
 //		try {
+//			//String url = "coap://localhost:5683";
 //			String url =
 //				ConfigConst.DEFAULT_COAP_PROTOCOL + "://" + ConfigConst.DEFAULT_HOST + ":" + ConfigConst.DEFAULT_COAP_PORT;
-//			
+//		//	this.csg = new CoapServerGateway();
 //			this.csg = new CoapServerGateway(USE_DEFAULT_RESOURCES);
 //			this.csg.startServer();
 //			
@@ -141,18 +146,22 @@ public class CoapServerGatewayTest
 //				url + "/" + ConfigConst.PRODUCT_NAME + "/" + ConfigConst.GATEWAY_DEVICE);
 //			clientConn.get();
 //			
-//			clientConn.setURI(
-//				url + "/" + ResourceNameEnum.GDA_MGMT_STATUS_CMD_RESOURCE.getResourceName());
-//			clientConn.get();
+////			clientConn.setURI(
+////	//			url + "/" + ResourceNameEnum.GDA_MGMT_STATUS_CMD_RESOURCE.getResourceName());
+////					url + "/" + ResourceNameEnum.GDA_MGMT_STATUS_CMD_RESOURCE.getResourceName());
+////
+////			clientConn.get();
+////			
+////			clientConn.setURI(
+////				url + "/" + ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE.getResourceName());
+////			clientConn.get();
 //			
+////			clientConn.setURI(
+////				url + "/" + ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName());
+////			clientConn.get();
 //			clientConn.setURI(
-//				url + "/" + ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE.getResourceName());
-//			clientConn.get();
-//			
-//			clientConn.setURI(
-//				url + "/" + ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName());
-//			clientConn.get();
-//			
+//					url + "/" + ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName());
+//				clientConn.get();			
 //			Thread.sleep(DEFAULT_TIMEOUT);
 //			
 //			this.csg.stopServer();

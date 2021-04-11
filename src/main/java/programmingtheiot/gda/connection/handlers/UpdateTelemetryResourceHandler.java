@@ -62,6 +62,11 @@ public class UpdateTelemetryResourceHandler extends CoapResource
 	@Override
 	public void handleGET(CoapExchange context)
 	{
+		_Logger.info("handleGET is called"+context.toString());
+		context.accept();
+		String type = "GET";
+		String msg = "Update Telemetry Resource data request handled: " + super.getName();
+		context.respond(ResponseCode.VALID, msg);	
 	}
 	
 	@Override

@@ -9,6 +9,7 @@ import org.eclipse.californium.core.server.resources.CoapExchange;
 import programmingtheiot.common.IDataMessageListener;
 import programmingtheiot.common.ResourceNameEnum;
 import programmingtheiot.data.ActuatorData;
+import programmingtheiot.data.DataUtil;
 
 public class GetActuatorCommandResourceHandler extends CoapResource
 {
@@ -45,19 +46,31 @@ public class GetActuatorCommandResourceHandler extends CoapResource
 	
 	public boolean onActuatorDataUpdate(ActuatorData data)
 	{
-		if (data != null) {
-			this.actuatorData.updateData(data);
-			
-			// notify all connected clients
-			super.changed();
-			
-			_Logger.fine("Actuator data updated for URI: " + super.getURI() + ": Data value = " + this.actuatorData.getValue());
-			
-			return true;
-		}
-		
-		return false;
-	}	
+//		if (data != null) {
+//			this.actuatorData.updateData(data);
+//			
+//			// notify all connected clients
+//			super.changed();
+//			
+//			_Logger.fine("Actuator data updated for URI: " + super.getURI() + ": Data value = " + this.actuatorData.getValue());
+//			
+//			return true;
+//		}
+//		
+//		return false;
+		  if (data != null) 
+		  {    if (this.actuatorData == null)
+		  {      this.actuatorData = new ActuatorData();   
+		  }         this.actuatorData.updateData(data);       
+		  // notify all connected clients    
+		  super.changed();       
+		  _Logger.fine( "Actuator data updated for URI: " + super.getURI() +
+				  ": Data value = " + this.actuatorData.getValue()); 
+		  return true; 
+		  }   
+		  return false;
+		  }
+//	}	
 	// public methods
 	
 	@Override
@@ -68,20 +81,33 @@ public class GetActuatorCommandResourceHandler extends CoapResource
 	@Override
 	public void handleGET(CoapExchange context)
 	{
-	    // TODO: validate 'context'
-		_Logger.info("Processing handleGET call ");
-
-	    // accept the request
-	    context.accept();
-	    
-	    // TODO: convert the locally stored ActuatorData to JSON using DataUtil
-
-	    // TODO: generate a response message, set the content type, and set the response code
-
-	    String jsonData;
-		// send an appropriate response
-	   // context.respond(ResponseCode.CONTENT, jsonData);
-	    context.respond(ResponseCode.CONTENT);
+//	    // TODO: validate 'context'
+//		_Logger.info("Processing handleGET call ");
+//
+//	    // accept the request
+//	    context.accept();
+//	    
+//	    // TODO: convert the locally stored ActuatorData to JSON using DataUtil
+//
+//	    // TODO: generate a response message, set the content type, and set the response code
+//
+//	    String jsonData;
+//		// send an appropriate response
+//	   // context.respond(ResponseCode.CONTENT, jsonData);
+//	    context.respond(ResponseCode.CONTENT);
+		  String       jsonData = ""; 
+		  ResponseCode code = ResponseCode.NOT_ACCEPTABLE;   
+		  context.accept();    
+		  // TODO: validate the request    
+		  try {    
+			  jsonData =      DataUtil.getInstance().actuatorDataToJson(        this.actuatorData);    
+			  code = ResponseCode.CONTENT;  
+			  } 
+		  catch (Exception e) {    
+			  _Logger.warning(      "Failed to handle PUT request. Message: " + e.getMessage());        
+			  code = ResponseCode.INTERNAL_SERVER_ERROR;  
+			  }    
+		  context.respond(code, jsonData);
 	}
 	
 	@Override

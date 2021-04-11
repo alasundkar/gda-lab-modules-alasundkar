@@ -22,7 +22,9 @@ import programmingtheiot.common.ConfigConst;
 import programmingtheiot.common.IDataMessageListener;
 import programmingtheiot.common.ResourceNameEnum;
 import programmingtheiot.gda.connection.handlers.GenericCoapResourceHandler;
+import programmingtheiot.gda.connection.handlers.GetActuatorCommandResourceHandler;
 import programmingtheiot.gda.connection.handlers.UpdateSystemPerformanceResourceHandler;
+import programmingtheiot.gda.connection.handlers.UpdateTelemetryResourceHandler;
 
 /**
  * Shell representation of class for student implementation.
@@ -61,7 +63,8 @@ public class CoapServerGateway
 	public CoapServerGateway(boolean useDefaultResources)
 	{
 		this(useDefaultResources ? ResourceNameEnum.values() : (ResourceNameEnum[]) null);
-		this.coapServer = new CoapServer();
+	//	this.coapServer = new CoapServer();
+		this.initServer(ResourceNameEnum.values());
 
 	}
 
@@ -90,8 +93,8 @@ public class CoapServerGateway
 			}
 	}
 	
-	
-	public void addResource(ResourceNameEnum resourceType, String endName, Resource resource)
+	//remove endname   
+	public void addResource(ResourceNameEnum resourceType, Resource resource)
 	{
 		// TODO: while not needed for this exercise, you may want to include
 		// the endName parameter as part of this resource chain creation process
@@ -101,16 +104,16 @@ public class CoapServerGateway
 			// handler generation(s) as needed, checking if any parent already
 			// exists - and if so, add to the existing resource
 			createAndAddResourceChain(resourceType, resource);
-			CoapResource top =
-				    new CoapResource("PIOT").add(
-				        new CoapResource("ConstrainedDevice").add(
-				            new UpdateSystemPerformanceResourceHandler("SystemPerfMsg")));
+		//	CoapResource top =
+			//	    new CoapResource("PIOT").add(
+				//        new CoapResource("ConstrainedDevice").add(
+				  //          new UpdateSystemPerformanceResourceHandler("SystemPerfMsg")));
 		}
 	}
 	
 	public boolean hasResource(String name)
 	{
-		return false;
+		return true;
 	}
 	
 	public void setDataMessageListener(IDataMessageListener listener)
@@ -173,6 +176,8 @@ public class CoapServerGateway
 			parentResource = nextResource;
 		}
 	}
+	
+	
 	private void createAndAddResourceChain(ResourceNameEnum resource)
 	{
 		List<String> resourceNames = resource.getResourceNameChain();
@@ -217,8 +222,23 @@ public class CoapServerGateway
 		
 		// TODO: Get the List of Strings representing all ResourceNameEnum names (assuming it's named 'resources')
 
-		for (ResourceNameEnum rn : resources) {
-			addResource(rn);
-		}
-	}
+//		
+//		  this.coapServer = new CoapServer();
+//		  
+
+		//create instances of the handler 
+
+		  GetActuatorCommandResourceHandler getActuatorCmdResourceHandler= new GetActuatorCommandResourceHandler( ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE);
+		  UpdateSystemPerformanceResourceHandler  updateSysPerfResourceHandler =new UpdateSystemPerformanceResourceHandler(   ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE);
+
+//		  // TODO: implement the telemetry resource handler(s)
+		  UpdateTelemetryResourceHandler updateTelefResourceHandler = new UpdateTelemetryResourceHandler(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE);
+		// add resources
+		  addResource(   ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE,  getActuatorCmdResourceHandler);		  
+		  addResource( ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE,  updateSysPerfResourceHandler);
+		  addResource(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, updateTelefResourceHandler );
+//	}
+		
+		
 }
+	}
