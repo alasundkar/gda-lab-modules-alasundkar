@@ -25,6 +25,7 @@ import programmingtheiot.data.SystemStateData;
 
 import programmingtheiot.gda.connection.CloudClientConnector;
 import programmingtheiot.gda.connection.CoapServerGateway;
+import programmingtheiot.gda.connection.ICloudClient;
 import programmingtheiot.gda.connection.IPersistenceClient;
 import programmingtheiot.gda.connection.IPubSubClient;
 import programmingtheiot.gda.connection.IRequestResponseClient;
@@ -52,11 +53,13 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	private boolean enableCloudClient = false;
 	private boolean enableSmtpClient = false;
 	private boolean enablePersistenceClient = false;
-	
+
 	private IPubSubClient mqttClient = null;
-	private IPubSubClient cloudClient = null;
+	private ICloudClient cloudClient = null;
 	private IPersistenceClient persistenceClient = null;
-	private IRequestResponseClient smtpClient = null;
+//	private IRequestResponseClient smtpClient = null;
+	private SmtpClientConnector smtpClient = null;
+
 	private CoapServerGateway coapServer = null;
 	public String IActuatorDataListener ;
 	
@@ -78,6 +81,7 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 		this.enableSmtpClient  = configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_SMTP_CLIENT_KEY);
 		this.enablePersistenceClient = configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_PERSISTENCE_CLIENT_KEY);
 		initConnections();
+
 	}
 	
 	public DeviceDataManager(
@@ -88,8 +92,13 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 		boolean enablePersistenceClient)
 	{
 		super();
-		
+		this.enableMqttClient = enableMqttClient;
+		this.enableCloudClient = enableCloudClient;
+		this.enableSmtpClient = enableSmtpClient;
+		this.enablePersistenceClient = enablePersistenceClient;
+		this.enableCoapServer = enableCoapClient;
 		initConnections();
+		ConfigUtil configUtil = ConfigUtil.getInstance();		
 	}
 	
 	
@@ -219,8 +228,8 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	@Override
 	public boolean handleSystemPerformanceMessage(ResourceNameEnum resourceName, SystemPerformanceData data)
 	{
-		return false;
-	}
+		_Logger.fine("handleSystemPerformanceMessage from DeviceDataManager has been called");
+		return true;	}
 	private boolean handleUpstreamTransmission(ResourceNameEnum resourceName, String jsonData, int qos) {
 		_Logger.fine("Persistence Client is active");
 		return true;
@@ -254,6 +263,11 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 		{
 			CloudClientConnector cloudClient1 = new CloudClientConnector();
 			cloudClient1.connectClient();
+			_Logger.info("connected to cloudClientConnector successfully");
+
+		}
+		else {
+			_Logger.info("failed to connect to cloudClientConnector");
 		}
 		
 		/*
@@ -301,6 +315,10 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 		{
 			CloudClientConnector cloudClient1 = new CloudClientConnector();
 			cloudClient1.disconnectClient();
+			_Logger.info("disconnected from cloudClientConnector successfully");
+		}
+		else {
+			_Logger.info("failed to disconnect from cloudClientConnector");
 		}
 		
 		/*
@@ -328,6 +346,18 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	 */
 	private void initConnections()
 	{
+		if(this.enableCloudClient) {
+			this.cloudClient = new CloudClientConnector();
+			this.cloudClient.setDataMessageListener(this);
+		}
+		
+		this.coapServer = new CoapServerGateway();
+		this.smtpClient = new SmtpClientConnector();
+		if(this.enableMqttClient)
+		{
+			this.mqttClient = new MqttClientConnector(false);
+			this.mqttClient.setDataMessageListener(this);
+		}
 	}
 	private void initManager(){  
 		this.sysPerfMgr = new SystemPerformanceManager();  
@@ -336,5 +366,9 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	}
 	
 	
+
 	
+	private void handleUpstreamTransmission(ResourceNameEnum resourceName, String msg) {
+		_Logger.fine("handleUpstreamTransmission has been called");
+	}
 }

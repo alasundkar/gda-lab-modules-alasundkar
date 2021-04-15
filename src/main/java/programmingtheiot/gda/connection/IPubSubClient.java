@@ -48,6 +48,7 @@ public interface IPubSubClient
 	 * @return bool True on success, False otherwise.
 	 */
 	public boolean publishMessage(ResourceNameEnum topicName, String msg, int qos);
+	//public boolean publishMessage(ResourceNameEnum topicName, byte[] payload, int qos);
 
 	/**
 	 * Attempts to subscribe to a topic with the given qos hosted by the

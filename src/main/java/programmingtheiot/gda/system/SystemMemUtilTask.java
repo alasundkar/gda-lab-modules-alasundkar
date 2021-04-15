@@ -10,6 +10,9 @@ package programmingtheiot.gda.system;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
+import java.util.logging.Logger;
+
+import programmingtheiot.gda.connection.CloudClientConnector;
 
 /**
  * Shell representation of class for student implementation.
@@ -18,7 +21,8 @@ import java.lang.management.MemoryUsage;
 public class SystemMemUtilTask extends BaseSystemUtilTask
 {
 	// constructors
-	
+	private static final Logger _Logger =
+			Logger.getLogger(CloudClientConnector.class.getName());
 	/**
 	 * Default.
 	 * 
@@ -34,7 +38,7 @@ public class SystemMemUtilTask extends BaseSystemUtilTask
 	@Override
 	protected float getSystemUtil()
 	{
-		return 0.0f;
+		return 10.0f;
 		//return ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
 	}
 	public float getTelemetryValue()
@@ -42,7 +46,7 @@ public class SystemMemUtilTask extends BaseSystemUtilTask
 		MemoryUsage memUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
         double memUtil = ((double) memUsage.getUsed() / (double) memUsage.getMax()) * 100.0d;
        
-     //   _Logger.info("memory utilization GDA::    " + memUtil);
+        _Logger.info("memory utilization GDA::    " + memUtil);
        
         return (float)memUtil;
 	}

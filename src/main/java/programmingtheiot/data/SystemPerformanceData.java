@@ -23,9 +23,9 @@ public class SystemPerformanceData extends BaseIotData implements Serializable
 	
 	// private var's
 	private static final long serialVersionUID = 1L;
-	private float cpuUtilization;
-	private float memUtilization;
-	private float diskUtilization;	
+	private float cpuUtilization = 1.0f;
+	private float memUtilization= 1.0f;
+	private float diskUtilization=1.0f;	
     
 	// constructors
 

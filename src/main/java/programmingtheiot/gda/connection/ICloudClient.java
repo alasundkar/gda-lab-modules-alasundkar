@@ -83,6 +83,24 @@ public interface ICloudClient
 	 * messages, such as those received from a subscription event.
 	 * @return bool True on success (if listener is non-null will always be the case), False otherwise.
 	 */
+	public boolean subscribeToCloudEvents(ResourceNameEnum resource);
+
+	/**
+	 * Sets the data message listener reference, assuming listener is non-null.
+	 * 
+	 * @param listener The data message listener instance to use for passing relevant
+	 * messages, such as those received from a subscription event.
+	 * @return bool True on success (if listener is non-null will always be the case), False otherwise.
+	 */
+	public boolean unsubscribeFromCloudEvents(ResourceNameEnum resource);
+	/**
+	 * Sets the data message listener reference, assuming listener is non-null.
+	 * 
+	 * @param listener The data message listener instance to use for passing relevant
+	 * messages, such as those received from a subscription event.
+	 * @return bool True on success (if listener is non-null will always be the case), False otherwise.
+	 */	
+
 	public boolean setDataMessageListener(IDataMessageListener listener);
 	
 }

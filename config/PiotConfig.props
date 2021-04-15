@@ -8,18 +8,20 @@
 #
 # Cloud client configuration information
 #
+#credFile       = ./cred/PiotCloudCred.props
+#certFile       = ./cert/PiotCloudCert.pem
 [Cloud.GatewayService]
-credFile       = ./cred/PiotCloudCred.props
-certFile       = ./cert/PiotCloudCert.pem
-host           = localhost
+credFile       = /home/rupesh/cd/certs/token
+certFile       = /home/rupesh/cd/certs/industrial.pem
+host           = 127.0.0.1
 port           = 1883
 securePort     = 8883
 defaultQoS     = 0
-keepAlive      = 60
+keepAlive      = 30
 enableAuth     = True
 enableCrypt    = True
-baseUrl        = 
-baseTopic      = 
+baseUrl        = https://things.ubidots.com/api/v1.6/
+baseTopic      = /v1.6/devices/
 
 #
 # SMTP client configuration information
