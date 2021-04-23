@@ -88,8 +88,15 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 		boolean enablePersistenceClient)
 	{
 		super();
-		
+		this.enableMqttClient = enableMqttClient;
+		this.enableCloudClient = enableCloudClient;
+		this.enableSmtpClient = enableSmtpClient;
+		this.enablePersistenceClient = enablePersistenceClient;
+		this.enableCoapServer = enableCoapClient;
 		initConnections();
+		ConfigUtil configUtil = ConfigUtil.getInstance();
+
+		
 	}
 	
 	
@@ -219,8 +226,25 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	@Override
 	public boolean handleSystemPerformanceMessage(ResourceNameEnum resourceName, SystemPerformanceData data)
 	{
-		return false;
-	}
+		_Logger.info("handleSystemPerformanceMessage has been called");
+		DataUtil dataUtil = DataUtil.getInstance();
+		try {
+			if(enablePersistenceClient == true)
+			{
+				this.persistenceClient.storeData(resourceName.getResourceName(), 0, data);
+				//String jsonData = dataUtil.systemPerformanceDataToJson(data);
+				return true;
+			}
+				
+		}
+		catch(Exception ex) {
+			_Logger.info("Exception occured: " + ex.getMessage());
+		}
+		return false;	}
+	
+	
+	
+	
 	private boolean handleUpstreamTransmission(ResourceNameEnum resourceName, String jsonData, int qos) {
 		_Logger.fine("Persistence Client is active");
 		return true;
@@ -328,6 +352,12 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	 */
 	private void initConnections()
 	{
+		this.coapServer = new CoapServerGateway();
+		if(this.enableMqttClient)
+			this.mqttClient = new MqttClientConnector();
+			this.mqttClient.setDataMessageListener(this);
+		this.persistenceClient = new RedisPersistenceAdapter();
+		
 	}
 	private void initManager(){  
 		this.sysPerfMgr = new SystemPerformanceManager();  
