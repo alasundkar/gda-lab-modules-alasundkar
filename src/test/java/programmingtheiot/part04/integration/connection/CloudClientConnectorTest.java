@@ -101,9 +101,9 @@ public class CloudClientConnectorTest
 		
 		IDataMessageListener listener = new DefaultDataMessageListener();
 		
-	//	assertTrue(this.cloudClient.connectClient());
-	//	assertTrue(this.cloudClient.subscribeToEdgeEvents(ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE));
-	//	assertTrue(this.cloudClient.subscribeToEdgeEvents(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE));
+		assertTrue(this.cloudClient.connectClient());
+		assertTrue(this.cloudClient.subscribeToEdgeEvents(ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE));
+		assertTrue(this.cloudClient.subscribeToEdgeEvents(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE));
 
 		try {
 			Thread.sleep(5000);
@@ -127,7 +127,7 @@ public class CloudClientConnectorTest
 			// ignore
 		}
 		
-	//	assertTrue(this.cloudClient.unsubscribeFromEdgeEvents(ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE));
+		assertTrue(this.cloudClient.unsubscribeFromEdgeEvents(ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE));
 
 		try {
 			Thread.sleep(5000);

@@ -38,8 +38,8 @@ public class SystemMemUtilTask extends BaseSystemUtilTask
 	@Override
 	protected float getSystemUtil()
 	{
-		return 10.0f;
-		//return ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
+		//return 10.0f;
+		return ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
 	}
 	public float getTelemetryValue()
 	{

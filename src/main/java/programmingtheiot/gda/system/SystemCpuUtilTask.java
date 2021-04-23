@@ -39,16 +39,17 @@ public class SystemCpuUtilTask extends BaseSystemUtilTask
 	@Override
 	protected float getSystemUtil()
 	{
-		return 10.0f;
-		//return (float) ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
+		//return 10.0f;
+		return (float) ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
 	}
 	public float getTelemetryValue()
 	{
-		MemoryUsage cpuUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
-        double cpuUtil = ((double) cpuUsage.getUsed() / (double) cpuUsage.getMax()) * 100.0d;
+		
+		 double cpuUsage = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
+    //    double cpuUtil = ((double) cpuUsage.getUsed() / (double) cpuUsage.getMax()) * 100.0d;
        
-        _Logger.info("memory utilization GDA::    " + cpuUtil);
+        _Logger.info("cpuUsage utilization GDA::    " + cpuUsage);
        
-        return (float)cpuUtil;
+        return (float)cpuUsage;
 	}
 }

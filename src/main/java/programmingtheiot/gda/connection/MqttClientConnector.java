@@ -8,10 +8,13 @@
 
 package programmingtheiot.gda.connection;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
@@ -28,6 +31,7 @@ import programmingtheiot.common.ConfigConst;
 import programmingtheiot.common.ConfigUtil;
 import programmingtheiot.common.IDataMessageListener;
 import programmingtheiot.common.ResourceNameEnum;
+import programmingtheiot.common.SimpleCertManagementUtil;
 import programmingtheiot.data.ActuatorData;
 import programmingtheiot.data.DataUtil;
 import programmingtheiot.data.SensorData;
@@ -45,16 +49,19 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		Logger.getLogger(MqttClientConnector.class.getName());
 	
 	// params
-	String host,clientID,brokerAddr,protocol,pemFileName,username;
+	String host,clientID,brokerAddr,pemFileName,username;
+	String protocol = "tcp";
 	MemoryPersistence persistence;
 	MqttConnectOptions connOpts;
 	int brokerKeepAlive,port;
 	MqttClient mqttClient;
-	private boolean useCloudGatewayConfig = false;
+//	private boolean useCloudGatewayConfig = false;
+	private boolean useCloudGatewayConfig;
 	boolean enableEncryption,useCleanSession,enableAutoReconnect,isClientConnected;
 
 //	private MqttClient mqttClient = null;
 	private IDataMessageListener dataMsgListener = null;
+
 	// constructors
 	
 	/**
@@ -73,14 +80,18 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		this.useCloudGatewayConfig = useCloudGatewayConfig;
 		
 		if (useCloudGatewayConfig) {
+		    _Logger.log(Level.INFO, "Using CloudGateway Config");
+
 			initClientParameters(ConfigConst.CLOUD_GATEWAY_SERVICE);
 		} else {
+			_Logger.log(Level.INFO, "Using MQTT Gateway Config");
 			initClientParameters(ConfigConst.MQTT_GATEWAY_SERVICE);
 		}
 	}	
-//	public MqttClientConnector()
+//	public MqttClientConnector(boolean useCloudGatewayConfig)
 //	{
 //		super();
+//									this.useCloudGatewayConfig = useCloudGatewayConfig;
 //		ConfigUtil configUtil = ConfigUtil.getInstance();
 //
 //		this.host =
@@ -98,8 +109,9 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 //
 //		// paho Java client requires a client ID
 //		this.clientID = MqttClient.generateClientId();
+//										initClientParameters(ConfigConst.CLOUD_GATEWAY_SERVICE);
 //
-//		// these are specific to the MQTT connection which will be used during connect
+////		// these are specific to the MQTT connection which will be used during connect
 //		this.persistence = new MemoryPersistence();
 //		this.connOpts = new MqttConnectOptions();
 //
@@ -121,6 +133,12 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	public boolean connectClient()
 	{
 		try {
+			_Logger.info("MQTT Client Connector is Started...");
+			if(this.mqttClient != null) {
+				_Logger.info("Client Already present..");
+				return false;
+			}
+			
 			if (this.mqttClient == null) {
 			    this.mqttClient = new MqttClient(this.brokerAddr, this.clientID, this.persistence);
 			    this.mqttClient.setCallback(this);
@@ -128,27 +146,34 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 			if (! this.mqttClient.isConnected()) {
 			    this.mqttClient.connect(this.connOpts);
 			    _Logger.log(Level.INFO, "Mqtt Client connected");
-			    return true;
 			}
-			
+		    return true;
+
 		}
 		catch(Exception ex) {
 			_Logger.log(Level.WARNING, ex.getMessage());
+			ex.printStackTrace();
+			return false;
+
 		}
-		return false;
 	}
 
 	@Override
 	public boolean disconnectClient()
 	{
-		if (this.mqttClient.isConnected()) {
-		    try {
-		    	_Logger.log(Level.INFO, "Mqtt Client disconnected");
+		try {
+			if (this.mqttClient.isConnected()) {
+				_Logger.info("Disconnecting MQTT Client");
 				this.mqttClient.disconnect();
-			} catch (MqttException e) {
-				e.printStackTrace();
+				return true;
+			}else {
+				_Logger.info("No Client to Disconnect");
+				return false;
 			}
-		    return true;
+			
+		}catch(MqttException e) {
+			_Logger.info("Sonething went wrong");
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -163,27 +188,17 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	@Override
 	public boolean publishMessage(ResourceNameEnum topicName, String msg, int qos)	
 	{
-		_Logger.log(Level.INFO, "publishMessage has been called");
-		if(topicName == null)
-			return false;
-		if(qos < 0 || qos > 2)
-			qos = ConfigConst.DEFAULT_QOS;
-		byte[] b;
 		try {
-		 b = msg.getBytes("UTF-8");
-		MqttMessage mqMsg = new MqttMessage(b);
-		mqttClient.publish(topicName.getResourceName(), mqMsg);
-		} catch (MqttPersistenceException e) {
+			String topic = topicName.getResourceName();
+			byte[] msgBytes = msg.getBytes();
+			this.publishMessage(topic, msgBytes, qos);
+			return true;
+		} catch (Exception e) {
+			_Logger.warning("Something went wrong" + e);
 			e.printStackTrace();
-			return false;
-		} catch (MqttException e) {
-			e.printStackTrace();
-			return false;
-		} catch (UnsupportedEncodingException e) {
-			 e.printStackTrace();
-			 return false;
 		}
-		return true;
+		
+		return false;
 	}
 	
 	protected boolean publishMessage(String topic, byte[] payload, int qos)
@@ -199,6 +214,8 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		// NOTE: you may want to log the exception stack trace if the call fails
 		try {
 			_Logger.info("Publishing message to topic: " + topic);
+			_Logger.info(" message to topic: " + message);
+
 			
 			this.mqttClient.publish(topic, message);
 			
@@ -217,19 +234,33 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 //	public boolean subscribeToTopic(ResourceNameEnum topicName, int qos)
 	public boolean subscribeToTopic(ResourceNameEnum topicName, int qos)
 	{
-		_Logger.log(Level.INFO, "subscribeToTopic has been called");
-		if (topicName == null)
-			return false;
-		if (qos > 0 || qos < 2)
-			qos = ConfigConst.DEFAULT_QOS;
+		
 		try {
-			mqttClient.subscribe(topicName.getResourceName(),qos);
-		} catch (MqttException e) {
+			String topic = topicName.toString();
+			this.subscribeToTopic(topic, qos);
+			_Logger.info("Successfully subscribed to " + topic);
+			return true;
+		} catch (Exception e) {
+			_Logger.warning("Subscription went wrong");
 			e.printStackTrace();
-			return false;
 		}
-		return true;
+		return false;
 	}
+	
+//	{
+//		_Logger.log(Level.INFO, "subscribeToTopic has been called");
+//		if (topicName == null)
+//			return false;
+//		if (qos > 0 || qos < 2)
+//			qos = ConfigConst.DEFAULT_QOS;
+//		try {
+//			mqttClient.subscribe(topicName.getResourceName(),qos);
+//		} catch (MqttException e) {
+//			e.printStackTrace();
+//			return false;
+//		}
+//		return true;
+//	}
 
 	protected boolean subscribeToTopic(String topic, int qos)
 	{
@@ -260,15 +291,28 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	}	
 	@Override
 	public boolean unsubscribeFromTopic(ResourceNameEnum topicName)
-	{
-		_Logger.log(Level.INFO, "unsubscribeToTopic has been called");
-		return true;
+//	{
+	{		_Logger.log(Level.INFO, "unsubscribeToTopic has been called");
+
+		
+		try {
+			String topic = topicName.toString();
+			this.unsubscribeFromTopic(topic);
+			_Logger.info("Successfully unsubscribed from " + topic);
+			return true;
+		} catch (Exception e) {
+			_Logger.warning("Subscription went wrong");
+			e.printStackTrace();
+		}
+		return false;
 	}
+		//return true;
+//	}
 
 	@Override
 	public boolean setDataMessageListener(IDataMessageListener listener)
 	{
-		//_Logger.log(Level.INFO, "setDataMessageListener has been called");
+		_Logger.log(Level.INFO, "setDataMessageListener has been called");
 	    if (listener != null) {
 	        this.dataMsgListener = listener;
 			_Logger.log(Level.INFO, "setDataMessageListener has been called: return: true" + " listerner value :" + listener);
@@ -281,34 +325,100 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	}
 	
 	// callbacks
-	
+
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI)
 	{
 		_Logger.info("MQTT connection successful (is reconnect = " + reconnect + "). Broker: " + serverURI);
 		
 		int qos = 1;
-//		this.subscribeToTopic(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, qos);
-//		this.subscribeToTopic(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, qos);
-//		this.subscribeToTopic(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, qos);
-		// Option 2
+		
 		try {
-			_Logger.log(Level.INFO, "inside connectComplete with topic name" + ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName());
-			this.mqttClient.subscribe("/v1.6/devices/constraineddevice/displaycmd");
+			//Try to subscribe to Actuator Response topic.
 			this.mqttClient.subscribe(
 				ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName(),
 				qos,
 				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, this.dataMsgListener));
-			_Logger.log(Level.INFO, "inside connectComplete with topic name" + ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName());
-			this.mqttClient.subscribe(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName(),
-				qos, 
-				new SensorResponseMessageListener(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, this.dataMsgListener));
-			this.mqttClient.subscribe(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName(),
-				qos,
-				new SystemPerformanceResponseMessageListener(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, this.dataMsgListener));
 		} catch (MqttException e) {
-			_Logger.warning("Failed to subscribe to CDA actuator response topic.");
-		}	}
+			_Logger.warning("Failed to subscribe to CDA actuator response topic. "+ e.getMessage());
+		}
+		
+		try {
+			//Try to subscribe to Sensor Response topic.
+			this.mqttClient.subscribe(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName(), qos, new SensorResponseMessageListener(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, this.dataMsgListener));
+			_Logger.info("MQTT Client CDA Sensor Response Successful");
+		} catch (MqttException e) {
+			_Logger.warning("Failed to subscribe to CDA sensor response topic. "+ e.getMessage());
+		}
+		
+		try {
+			//Try to subscribe to CDA System topic.
+			this.mqttClient.subscribe(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName(), qos, new SystemPerformanceResponseMessageListener(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, this.dataMsgListener));			
+			_Logger.info("MQTT Client CDA SYSTEM  Response Successful");
+		} catch (MqttException e) {
+			_Logger.warning("Failed to subscribe to CDA System Perf resource topic. " + e.getMessage());
+		}
+		
+		try {
+			if(this.useCloudGatewayConfig == true) {
+				this.mqttClient.subscribe(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE.getResourceName(), qos, new ActuatorResponseMessageListener(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE, this.dataMsgListener));
+			}	
+		} catch (Exception e) {
+			_Logger.warning("Failed to subscribe to CDA Display resource topic." + e.getMessage());
+		}
+	}
+	
+	
+//	@Override
+//	public void connectComplete(boolean reconnect, String serverURI)
+//	{
+//		_Logger.info("MQTT connection successful (is reconnect = " + reconnect + "). Broker: " + serverURI);
+//		_Logger.info("List of topic names: ");
+//		_Logger.info(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName());
+//		_Logger.info(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName());
+//		_Logger.info(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName());
+//		
+//		int qos = 1;
+////		this.subscribeToTopic(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, qos);
+////		this.subscribeToTopic(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, qos);
+////		this.subscribeToTopic(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, qos);
+//		// Option 2
+//		try {
+//			_Logger.log(Level.INFO, "inside connectComplete with topic name" + ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName());
+//			this.mqttClient.subscribe("/v1.6/devices/constraineddevice/displaycmd");
+//			_Logger.info("Successfully subscribed 'displaycmd' topic");
+//			this.mqttClient.subscribe(
+//				ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName(),
+//				qos,
+//				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, this.dataMsgListener));
+//            _Logger.info("Successfully subscribed: " + ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName());
+//
+//		//	this.mqttClient.unsubscribe(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName());
+//          //  _Logger.info("Successfully unsubscribed: " + ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName());
+//            
+//			_Logger.log(Level.INFO, "inside connectComplete with topic name" + ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName());
+//			this.mqttClient.subscribe(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName(),
+//				qos, 
+//				new SensorResponseMessageListener(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, this.dataMsgListener));
+//            _Logger.info("Successfully subscribed: " + ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName());
+//	//		this.mqttClient.unsubscribe(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName());
+//      //      _Logger.info("Successfully unsubscribed: " + ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName());
+//
+//			
+//			this.mqttClient.subscribe(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName(),
+//				qos,
+//				new SystemPerformanceResponseMessageListener(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, this.dataMsgListener));
+//            _Logger.info("Successfully subscribed: " + ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName());
+//		//	this.mqttClient.unsubscribe(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName());
+//         //   _Logger.info("Successfully unsubscribed: " + ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName());
+//
+//        //    this.mqttClient.unsubscribe("/v1.6/devices/constraineddevice/displaycmd");
+//			//_Logger.info("Successfully unsubscribed 'displaycmd' topic");
+//
+//		} catch (MqttException e) {
+//			_Logger.warning("Failed to subscribe to CDA actuator response topic." + " Exception: " + e.getMessage() );
+//		}
+	//}
 
 	@Override
 	public void connectionLost(Throwable t)
@@ -326,7 +436,7 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	@Override
 	public void messageArrived(String topic, MqttMessage msg) throws Exception
 	{
-		_Logger.log(Level.INFO, "Message arrived on topic" + topic + " Messgae: " + msg.toString());
+		_Logger.log(Level.INFO, "Message arrived on topic: " + topic + " Messgae: " + msg.toString());
 	}
 
 	
@@ -361,18 +471,18 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		
 		// Paho Java client requires a client ID
 		this.clientID = MqttClient.generateClientId();
-		this.username = "BBFF-1cnXHhNxeBVY0BzXJ5a0eJNQG07HKU";
+		this.username = "BBFF-PMCutJyfgw61xURX6kO5EMuCupzsBd";
 		// these are specific to the MQTT connection which will be used during connect
 		this.persistence = new MemoryPersistence();
 		this.connOpts    = new MqttConnectOptions();
 		
 		if(this.useCloudGatewayConfig == true) {
-			this.connOpts.setUserName("BBFF-1cnXHhNxeBVY0BzXJ5a0eJNQG07HKU");
+			this.connOpts.setUserName(this.username);
 		}
-		this.connOpts.setAutomaticReconnect(true);
 		this.connOpts.setKeepAliveInterval(this.brokerKeepAlive);
 		this.connOpts.setCleanSession(this.useCleanSession);
-		
+		this.connOpts.setAutomaticReconnect(this.enableAutoReconnect);
+
 		// if encryption is enabled, try to load and apply the cert(s)
 		if (this.enableEncryption) {
 			initSecureConnectionParameters(configSectionName);
@@ -390,7 +500,7 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		}
 		this.brokerAddr  = this.protocol + "://" + this.host + ":" + this.port;
 		
-		_Logger.info("Using URL for broker conn: " + this.brokerAddr);		
+		_Logger.info("Using URL for broker conn: " + this.brokerAddr);	
 	}
 	
 	/**
@@ -403,6 +513,8 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	{
 		// TODO: implement this
 	}
+
+	
 	
 	/**
 	 * Called by {@link #initClientParameters(String)} to enable encryption.
@@ -413,6 +525,43 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	private void initSecureConnectionParameters(String configSectionName)
 	{
 		// TODO: implement this
+		ConfigUtil configUtil = ConfigUtil.getInstance();
+		
+		try {
+			_Logger.info("Configuring TLS...");
+			
+			if (this.pemFileName != null) {
+				File file = new File(this.pemFileName);
+				
+				if (file.exists()) {
+					_Logger.info("PEM file valid. Using secure connection: " + this.pemFileName);
+				} else {
+					this.enableEncryption = false;
+					
+					_Logger.log(Level.WARNING, "PEM file invalid. Using insecure connection: " + pemFileName, new Exception());
+					
+					return;
+				}
+			}
+			
+			SSLSocketFactory sslFactory =
+				SimpleCertManagementUtil.getInstance().loadCertificate(this.pemFileName);
+			
+			this.connOpts.setSocketFactory(sslFactory);
+			
+			// override current config parameters
+			this.port =
+				configUtil.getInteger(
+					configSectionName, ConfigConst.SECURE_PORT_KEY, ConfigConst.DEFAULT_MQTT_SECURE_PORT);
+			
+			this.protocol = ConfigConst.DEFAULT_MQTT_SECURE_PROTOCOL;
+			
+			_Logger.info("TLS enabled.");
+		} catch (Exception e) {
+			_Logger.log(Level.SEVERE, "Failed to initialize secure MQTT connection. Using insecure connection.", e);
+			
+			this.enableEncryption = false;
+		}
 	}
 }
 
@@ -437,6 +586,8 @@ class ActuatorResponseMessageListener implements IMqttMessageListener
 			
 			if (this.dataMsgListener != null) {
 				this.dataMsgListener.handleActuatorCommandResponse(resource, actuatorData);
+				_Logger.warning("Successfully to convert message payload to ActuatorData.");
+
 			}
 		} catch (Exception e) {
 			_Logger.warning("Failed to convert message payload to ActuatorData.");
@@ -495,6 +646,8 @@ class SystemPerformanceResponseMessageListener implements IMqttMessageListener
 			
 			if (this.dataMsgListener != null) {
 				this.dataMsgListener.handleSystemPerformanceMessage(resource, systemPerformanceData);
+				_Logger.warning("Successfully to convert message payload to systemPerformanceData.");
+
 			}
 		} catch (Exception e) {
 			_Logger.warning("Failed to convert message payload to systemPerformanceData.");

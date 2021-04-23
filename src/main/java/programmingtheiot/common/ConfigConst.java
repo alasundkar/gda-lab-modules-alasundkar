@@ -46,12 +46,18 @@ public class ConfigConst
 	public static final String GATEWAY      = "Gateway";
 	public static final String CONSTRAINED  = "Constrained";
 	public static final String DEVICE       = "Device";
+	
+//	public static final String GATEWAY      = "gateway";
+//	public static final String CONSTRAINED  = "constrained";
+//	public static final String DEVICE      = "device";
+	
 	public static final String SERVICE      = "Service";
 
 	public static final String CONSTRAINED_DEVICE = CONSTRAINED + DEVICE;
 	public static final String GATEWAY_DEVICE     = GATEWAY + DEVICE;
 	public static final String GATEWAY_SERVICE    = GATEWAY + SERVICE;
 	public static final String CLOUD_SERVICE      = CLOUD + SERVICE;
+
 
 	/*****
 	 * Property Names
