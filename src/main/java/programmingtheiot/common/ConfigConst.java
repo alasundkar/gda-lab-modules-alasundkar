@@ -47,12 +47,19 @@ public class ConfigConst
 	public static final String CONSTRAINED  = "Constrained";
 	public static final String DEVICE       = "Device";
 	
-//	public static final String GATEWAY      = "gateway";
-//	public static final String CONSTRAINED  = "constrained";
-//	public static final String DEVICE      = "device";
+	public static final String PRODUCT_NAME1 = "piot";
+	public static final String CLOUD1        = "cloud";
+	public static final String GATEWAY1      = "gateway";
+	public static final String CONSTRAINED1  = "constrained";
+	public static final String DEVICE1      = "device";
+	public static final String SERVICE1      = "service";
 	
 	public static final String SERVICE      = "Service";
-
+	public static final String CONSTRAINED_DEVICE1 = CONSTRAINED1 + DEVICE1;
+	public static final String GATEWAY_DEVICE1     = GATEWAY1 + DEVICE1;
+	public static final String GATEWAY_SERVICE1    = GATEWAY1 + SERVICE1;
+	public static final String CLOUD_SERVICE1      = CLOUD1 + SERVICE1;
+	
 	public static final String CONSTRAINED_DEVICE = CONSTRAINED + DEVICE;
 	public static final String GATEWAY_DEVICE     = GATEWAY + DEVICE;
 	public static final String GATEWAY_SERVICE    = GATEWAY + SERVICE;
@@ -158,7 +165,8 @@ public class ConfigConst
 	public static final String ENABLE_CLOUD_CLIENT_KEY       = "enableCloudClient";
 	public static final String ENABLE_SMTP_CLIENT_KEY        = "enableSmtpClient";
 	public static final String ENABLE_PERSISTENCE_CLIENT_KEY = "enablePersistenceClient";
-	
+	public static final String CLOUD_GATEWAY_SERVICE1 = CLOUD1   + "." + GATEWAY_SERVICE1;
+
 	public static final String CLOUD_GATEWAY_SERVICE = CLOUD   + "." + GATEWAY_SERVICE;
 	public static final String COAP_GATEWAY_SERVICE  = COAP    + "." + GATEWAY_SERVICE;
 	public static final String MQTT_GATEWAY_SERVICE  = MQTT    + "." + GATEWAY_SERVICE;

@@ -264,13 +264,14 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 
 	protected boolean subscribeToTopic(String topic, int qos)
 	{
+		//topic = "/ConstrainedDevice/DisplayCmd";
 		// NOTE: you may want to log the exception stack trace if the call fails
 		try {
 			this.mqttClient.subscribe(topic, qos);
 			
 			return true;
 		} catch (MqttException e) {
-			_Logger.warning("Failed to subscribe to topic: " + topic);
+			//_Logger.warning("Failed to subscribe to topic: " + topic);
 		}
 		
 		return false;
@@ -335,36 +336,42 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		
 		try {
 			//Try to subscribe to Actuator Response topic.
+			_Logger.warning("Topic Filter: " + ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName() + "  qos:  " + qos + " " + "  IMqttMessageListener: " + 				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, this.dataMsgListener) );
+
 			this.mqttClient.subscribe(
 				ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName(),
 				qos,
-				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, this.dataMsgListener));
+				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, 
+						this.dataMsgListener));
 		} catch (MqttException e) {
-			_Logger.warning("Failed to subscribe to CDA actuator response topic. "+ e.getMessage());
+			//_Logger.warning("Failed to subscribe to CDA actuator response topic. "+ e.getMessage());
 		}
 		
 		try {
 			//Try to subscribe to Sensor Response topic.
-			this.mqttClient.subscribe(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName(), qos, new SensorResponseMessageListener(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, this.dataMsgListener));
+			this.mqttClient.subscribe(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName(), 
+					qos, new SensorResponseMessageListener(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, this.dataMsgListener));
 			_Logger.info("MQTT Client CDA Sensor Response Successful");
 		} catch (MqttException e) {
-			_Logger.warning("Failed to subscribe to CDA sensor response topic. "+ e.getMessage());
+			//_Logger.warning("Failed to subscribe to CDA sensor response topic. "+ e.getMessage());
 		}
 		
 		try {
 			//Try to subscribe to CDA System topic.
-			this.mqttClient.subscribe(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName(), qos, new SystemPerformanceResponseMessageListener(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, this.dataMsgListener));			
+			this.mqttClient.subscribe(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName(), qos, 
+					new SystemPerformanceResponseMessageListener(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, this.dataMsgListener));			
 			_Logger.info("MQTT Client CDA SYSTEM  Response Successful");
 		} catch (MqttException e) {
-			_Logger.warning("Failed to subscribe to CDA System Perf resource topic. " + e.getMessage());
+		//	_Logger.warning("Failed to subscribe to CDA System Perf resource topic. " + e.getMessage());
 		}
 		
 		try {
 			if(this.useCloudGatewayConfig == true) {
-				this.mqttClient.subscribe(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE.getResourceName(), qos, new ActuatorResponseMessageListener(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE, this.dataMsgListener));
+				this.mqttClient.subscribe(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE.getResourceName(), qos, 
+						new ActuatorResponseMessageListener(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE, this.dataMsgListener));
 			}	
 		} catch (Exception e) {
-			_Logger.warning("Failed to subscribe to CDA Display resource topic." + e.getMessage());
+		//	_Logger.warning("Failed to subscribe to CDA Display resource topic." + e.getMessage());
 		}
 	}
 	
@@ -512,6 +519,24 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	private void initCredentialConnectionParameters(String configSectionName)
 	{
 		// TODO: implement this
+//		ConfigUtil configUtil = ConfigUtil.getInstance();
+//		
+//		try {
+//			_Logger.info("Checking if credentials file exists and us loadable...");
+//			
+//			Properties props = configUtil.getCredentials(configSectionName);
+//			
+//			if (props != null) {
+//				this.connOpts.setUserName(props.getProperty(ConfigConst.USER_NAME_TOKEN_KEY, ""));
+//				this.connOpts.setPassword(props.getProperty(ConfigConst.USER_AUTH_TOKEN_KEY, "").toCharArray());
+//				
+//				_Logger.info("Credentials now set.");
+//			} else {
+//				_Logger.warning("No credentials are set.");
+//			}
+//		} catch (Exception e) {
+//			_Logger.log(Level.WARNING, "Credential file non-existent. Disabling auth requirement.");
+//		}
 	}
 
 	
