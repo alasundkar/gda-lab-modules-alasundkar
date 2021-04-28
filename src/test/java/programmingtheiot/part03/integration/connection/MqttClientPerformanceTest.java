@@ -90,7 +90,7 @@ public class MqttClientPerformanceTest
 	@Test
 	public void testPublishQoS0()
 	{
-		execTestPublish(100000, 0);
+		execTestPublish(MAX_TEST_RUNS, 0);
 	}
 	
 	/**
@@ -99,7 +99,7 @@ public class MqttClientPerformanceTest
 	@Test
 	public void testPublishQoS1()
 	{
-		execTestPublish(100000, 1);
+		execTestPublish(MAX_TEST_RUNS, 1);
 	}
 	
 	/**
@@ -108,7 +108,7 @@ public class MqttClientPerformanceTest
 	@Test
 	public void testPublishQoS2()
 	{
-		execTestPublish(100000, 2);
+		execTestPublish(MAX_TEST_RUNS, 2);
 	}
 	
 	private void execTestPublish(int maxTestRuns, int qos)
