@@ -52,7 +52,7 @@ public class CoapServerGateway
 	{
 		this((ResourceNameEnum[]) null);
 		this.coapServer = new CoapServer();
-		this.initServer(ResourceNameEnum.values());
+	/	this.initServer(ResourceNameEnum.values());
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class CoapServerGateway
 	public CoapServerGateway(boolean useDefaultResources)
 	{
 		this(useDefaultResources ? ResourceNameEnum.values() : (ResourceNameEnum[]) null);
-	//	this.coapServer = new CoapServer();
+	//	this.coapServer = new CoapServer(); dont uncomment
 		this.initServer(ResourceNameEnum.values());
 
 	}

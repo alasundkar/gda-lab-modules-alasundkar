@@ -49,7 +49,8 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		Logger.getLogger(MqttClientConnector.class.getName());
 	
 	// params
-	String host,clientID,brokerAddr,protocol,pemFileName;
+	String host,clientID,brokerAddr,pemFileName;
+	String protocol = "tcp";
 	MemoryPersistence persistence;
 	MqttConnectOptions connOpts;
 	int brokerKeepAlive,port;
@@ -232,18 +233,34 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		
 		int qos = 1;
 		
-//		this.subscribeToTopic(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, qos);
-//		this.subscribeToTopic(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, qos);
-//		this.subscribeToTopic(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, qos);
+		this.subscribeToTopic(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, qos);
+		this.subscribeToTopic(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, qos);
+		this.subscribeToTopic(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, qos);
 		// Option 2
-		try {
-			this.mqttClient.subscribe(
-				ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName(),
-				qos,
-				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, this.dataMsgListener));
-		} catch (MqttException e) {
-			_Logger.warning("Failed to subscribe to CDA actuator response topic.");
-		}
+//		try {
+//			this.mqttClient.subscribe(
+//				ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName(),
+//				qos,
+//				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, this.dataMsgListener));
+//		} catch (MqttException e) {
+//			_Logger.warning("Failed to subscribe to CDA actuator response topic.");
+//		}
+//		try {
+//			this.mqttClient.subscribe(
+//				ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName(),
+//				qos,
+//				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, this.dataMsgListener));
+//		} catch (MqttException e) {
+//			_Logger.warning("Failed to subscribe to CDA actuator response topic.");
+//		}
+//		try {
+//			this.mqttClient.subscribe(
+//				ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName(),
+//				qos,
+//				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, this.dataMsgListener));
+//		} catch (MqttException e) {
+//			_Logger.warning("Failed to subscribe to CDA actuator response topic.");
+//		}
 	}
 
 	@Override
@@ -419,7 +436,8 @@ class ActuatorResponseMessageListener implements IMqttMessageListener
 		try {
 			ActuatorData actuatorData =
 				DataUtil.getInstance().jsonToActuatorData(new String(message.getPayload()));
-			
+			_Logger.warning("message payload to ActuatorData.  :"+ actuatorData);
+
 			if (this.dataMsgListener != null) {
 				this.dataMsgListener.handleActuatorCommandResponse(resource, actuatorData);
 			}
@@ -447,7 +465,9 @@ class SensorResponseMessageListener implements IMqttMessageListener
 		try {
 			SensorData sensorData =
 				DataUtil.getInstance().jsonToSensorData(new String(message.getPayload()));
-			
+			 String str = new String(message.getPayload());
+			_Logger.warning(" message payload to sensorData." + str);
+
 			if (this.dataMsgListener != null) {
 				this.dataMsgListener.handleSensorMessage(resource, sensorData);
 			}
@@ -476,7 +496,8 @@ class SystemPerformanceResponseMessageListener implements IMqttMessageListener
 		try {
 			SystemPerformanceData systemPerformanceData =
 				DataUtil.getInstance().jsonToSystemPerformanceData(new String(message.getPayload()));
-			
+			 String str = new String(message.getPayload());
+			_Logger.warning(" message payload to sensorData." + str);
 			if (this.dataMsgListener != null) {
 				this.dataMsgListener.handleSystemPerformanceMessage(resource, systemPerformanceData);
 			}

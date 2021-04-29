@@ -68,7 +68,7 @@ public class GatewayDeviceApp
 			// ignore
 		}
 		
-		gwApp.stopApp(0);
+	//	gwApp.stopApp(0);
 	}
 	
 	
@@ -110,8 +110,8 @@ public class GatewayDeviceApp
 		} catch (Exception e) {
 			_Logger.log(Level.SEVERE, "Failed to cleanly stop GDA. Exiting.", e);
 		}
-		this.devDataMgr.stopManager();
-		System.exit(code);
+	//	this.devDataMgr.stopManager();
+	//	System.exit(code);
 	}
 	
 	

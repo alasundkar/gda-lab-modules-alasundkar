@@ -198,29 +198,60 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 		/*
 		 * Checking if Persistence Client is active.
 		 */
-		if (enablePersistenceClient == true)
-		{
-			_Logger.info("Persistence Client is active");
-			persistenceClient.storeData(resourceName.getResourceName(), ConfigConst.DEFAULT_QOS, data);
-		}
 		
-		DataUtil dataUtil = new DataUtil();
-		String message = dataUtil.sensorDataToJson(data);
-
-//		handleUpstreamTransmission(resourceName, message);
-		
-
-//			Properties prop = readPropertiesFile("PiotConfig.props");
-			
-		//	if(Float.valueOf(message) < Float.valueOf(prop.getProperty("humiditySimFloor")) ||
-			//		Float.valueOf(message) > Float.valueOf(prop.getProperty("humiditySimCeiling"))) {
+		DataUtil dataUtil = DataUtil.getInstance();
+		try {
+			if(data.getSensorType() == 1 ) {
+				ActuatorData ad = new ActuatorData();
+				ad.setCommand(ActuatorData.COMMAND_ON);
+				ad.setValue(32);
+				ad.setActuatorType(2);
+				String jsonActuatorData = dataUtil.actuatorDataToJson(ad);
+				this.mqttClient.connectClient();
+				this.mqttClient.publishMessage(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE, jsonActuatorData, 1);
+			}
+			if(enablePersistenceClient == true)
+			{
+				this.persistenceClient.storeData(resourceName.getResourceName(), ConfigConst.DEFAULT_QOS, data);
+				String jsonData = dataUtil.sensorDataToJson(data);
+			//	this.handleUpstreamTransmission(resourceName, jsonData);
+				return true;
+			}
 				
-				ActuatorData actuatorData = new ActuatorData();
-				actuatorData.setValue(Float.valueOf(message));
-				actuatorData.setCommand(ActuatorData.COMMAND_ON);
-				mqttClient.publishMessage(resourceName, message, 1);
-
-		return true;
+		}
+		catch(Exception ex) {
+			_Logger.info("Exception occured: " + ex.getMessage());
+		}
+		return false;
+		
+		
+		
+		
+		
+		
+//		if (enablePersistenceClient == true)
+//		{
+//			_Logger.info("Persistence Client is active");
+//			persistenceClient.storeData(resourceName.getResourceName(), ConfigConst.DEFAULT_QOS, data);
+//		}
+//		
+//		DataUtil dataUtil = new DataUtil();
+//		String message = dataUtil.sensorDataToJson(data);
+//
+////		handleUpstreamTransmission(resourceName, message);
+//		
+//
+////			Properties prop = readPropertiesFile("PiotConfig.props");
+//			
+//		//	if(Float.valueOf(message) < Float.valueOf(prop.getProperty("humiditySimFloor")) ||
+//			//		Float.valueOf(message) > Float.valueOf(prop.getProperty("humiditySimCeiling"))) {
+//				
+//				ActuatorData actuatorData = new ActuatorData();
+//				actuatorData.setValue(Float.valueOf(message));
+//				actuatorData.setCommand(ActuatorData.COMMAND_ON);
+//				mqttClient.publishMessage(resourceName, message, 1);
+//
+//		return true;
 	}
 
 	@Override
@@ -351,11 +382,12 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	 * 
 	 */
 	private void initConnections()
-	{
+	{   if(this.enableCoapServer) {
 		this.coapServer = new CoapServerGateway();
-		if(this.enableMqttClient)
+	}
+		if(this.enableMqttClient) {
 			this.mqttClient = new MqttClientConnector();
-			this.mqttClient.setDataMessageListener(this);
+			this.mqttClient.setDataMessageListener(this);}
 		this.persistenceClient = new RedisPersistenceAdapter();
 		
 	}

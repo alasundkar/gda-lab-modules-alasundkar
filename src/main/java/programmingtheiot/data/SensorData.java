@@ -22,7 +22,8 @@ public class SensorData extends BaseIotData implements Serializable
 	
 	
 	// private var's
-	
+	private int sensorType = 1;
+
 	private float value ;
 	// constructors
 	
@@ -48,6 +49,13 @@ public class SensorData extends BaseIotData implements Serializable
 		return this.value;
 	}
 	
+	public int getSensorType() {
+		return this.sensorType;
+	}
+	
+	public void setSensorType(int sensorType) {
+		this.sensorType = sensorType;
+	}
 	/**
 	 * Modifies the value of SensorData.
 	 * @param val : Float
