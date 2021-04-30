@@ -46,15 +46,16 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 		Logger.getLogger(DeviceDataManager.class.getName());
 	
 	// private var's
-	
+	private boolean isPersistentClientActive = false;
 	private boolean enableMqttClient = true;
 	private boolean enableCoapServer = false;
 	private boolean enableCloudClient = false;
 	private boolean enableSmtpClient = false;
 	private boolean enablePersistenceClient = false;
-	
+	private CloudClientConnector cloudClient = null;
+
 	private IPubSubClient mqttClient = null;
-	private IPubSubClient cloudClient = null;
+	//private IPubSubClient cloudClient = null;
 	private IPersistenceClient persistenceClient = null;
 	private IRequestResponseClient smtpClient = null;
 	private CoapServerGateway coapServer = null;
@@ -259,19 +260,22 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	{
 		_Logger.info("handleSystemPerformanceMessage has been called");
 		DataUtil dataUtil = DataUtil.getInstance();
-		try {
-			if(enablePersistenceClient == true)
-			{
-				this.persistenceClient.storeData(resourceName.getResourceName(), 0, data);
-				//String jsonData = dataUtil.systemPerformanceDataToJson(data);
-				return true;
-			}
-				
+		cloudClient.sendEdgeDataToCloud(resourceName, data);
+		
+//		try {
+//			if(enablePersistenceClient == true)
+//			{
+//				this.persistenceClient.storeData(resourceName.getResourceName(), 0, data);
+//				//String jsonData = dataUtil.systemPerformanceDataToJson(data);
+//				return true;
+//			}
+//				
+//		}
+//		catch(Exception ex) {
+//			_Logger.info("Exception occured: " + ex.getMessage());
+//		}
+		return false;	
 		}
-		catch(Exception ex) {
-			_Logger.info("Exception occured: " + ex.getMessage());
-		}
-		return false;	}
 	
 	
 	
@@ -282,95 +286,80 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	}
 	public void startManager()
 	{
-		_Logger.info("DeviceDataManager has been initialized...");
-		
-		/*
-		 * Establishing MQTT Client Connection.
-		 */
-		if (enableMqttClient == true)
-		{
-			MqttClientConnector mqttClient1 = new MqttClientConnector();
-			mqttClient1.connectClient();
-		}
-		
-		/*
-		 * Establishing persistent connection.
-		 */
-		if (enablePersistenceClient == true)
-		{
-			RedisPersistenceAdapter persistenceClient1 = new RedisPersistenceAdapter();
-			persistenceClient1.connectClient();
-		}
-		
-		/*
-		 * Establishing connection to the cloud.
-		 */
-		if (enableCloudClient == true)
-		{
-			CloudClientConnector cloudClient1 = new CloudClientConnector();
-			cloudClient1.connectClient();
-		}
-		
-		/*
-		 * Initializing the CoAP Server.
-		 */
-		if (enableCoapServer == true)
-		{
-			CoapServerGateway coapServer1 = new CoapServerGateway();
-			coapServer1.startServer();
-		}
-		
+		_Logger.info("Data Device Manager has started");
 		/*
 		 * Initializing System Performance Manager.
 		 */
 	  
 	  this.sysPerfMgr.startManager();
+	  
+		if(this.enableCloudClient) {
+			if(this.cloudClient.connectClient()) {
+				//this.cloudClient.subscribeToEdgeEvents(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE);
+				_Logger.info("connected to cloudClientConnector successfully");
+			}else {
+				_Logger.info("failed to connect to cloudClientConnector");
+			}
+		}
+		if(this.enableMqttClient) {
+			if(this.mqttClient.connectClient()) {
+				_Logger.info("connected to mqttClientConnector successfully");
+			}else {
+				_Logger.info("failed to connect to mqttClientConnector");
+			}
+		}
+		if(this.enablePersistenceClient) {
+			if(this.persistenceClient.connectClient()) {
+				_Logger.info("connected to redisPersistenceAdapter successfully");
+				isPersistentClientActive = true;
+			}else {
+				_Logger.info("failed to connect to redisPersistenceAdapter");
+			}
+		}
+		if(this.enableCoapServer) {
+			if(this.coapServer.startServer()) {
+				_Logger.info("connected to coapServerGateway successfully");
+			}else {
+				_Logger.info("failed to connect to coapServerGateway");
+			}
+		}
+		
+
 	}
 		
 	public void stopManager()
 	{
-		_Logger.info("DeviceDataManager was stopped..");
-		
-		/*
-		 * Terminating MQTT Client Connection.
-		 */
-		if (enableMqttClient == true)
-		{
-			MqttClientConnector mqttClient1 = new MqttClientConnector();
-			mqttClient1.disconnectClient();
+		_Logger.info("Data Device Manager has stopped");
+		this.sysPerfMgr.stopManager();
+		if(this.enableCloudClient) {
+			if(this.cloudClient.disconnectClient()) {
+				_Logger.info("disconnected from cloudClientConnector successfully");
+			}else {
+				_Logger.info("failed to disconnect from cloudClientConnector");
+			}
 		}
-		
-		/*
-		 * Terminating persistent connection.
-		 */
-		if (enablePersistenceClient == true)
-		{
-			RedisPersistenceAdapter persistenceClient1 = new RedisPersistenceAdapter();
-			persistenceClient1.disconnectClient();
+		if(this.enableMqttClient) {
+			if(this.mqttClient.disconnectClient()) {
+				_Logger.info("disconnected from mqttClientConnector successfully");
+			}else {
+				_Logger.info("failed to disconnect from mqttClientConnector");
+			}
 		}
-		
-		/*
-		 * Terminating connection to the cloud.
-		 */
-		if (enableCloudClient == true)
-		{
-			CloudClientConnector cloudClient1 = new CloudClientConnector();
-			cloudClient1.disconnectClient();
+		if(this.enablePersistenceClient) {
+			if(this.persistenceClient.disconnectClient()) {
+				_Logger.info("disconnected from redisPersistenceAdapter successfully");
+				isPersistentClientActive = false;
+			}else {
+				_Logger.info("failed to disconnect from redisPersistenceAdapter");
+			}
 		}
-		
-		/*
-		 * Stopping the CoAP Server.
-		 */
-		if (enableCoapServer == true)
-		{
-			CoapServerGateway coapServer1 = new CoapServerGateway();
-			coapServer1.stopServer();
+		if(this.enableCoapServer) {
+			if(this.coapServer.stopServer()) {
+				_Logger.info("disconnected from coapServerGateway successfully");
+			}else {
+				_Logger.info("failed to disconnect from coapServerGateway");
+			}
 		}
-		
-		/*
-		 * Stopping System Performance Manager.
-		 */	  
-	  this.sysPerfMgr.stopManager();
 	}
 
 	
@@ -382,13 +371,20 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	 * 
 	 */
 	private void initConnections()
-	{   if(this.enableCoapServer) {
+
+	{ 
+		if(this.enableCloudClient) {
+			this.cloudClient = new CloudClientConnector();
+			this.cloudClient.setDataMessageListener(this);
+		}
+		
+		if(this.enableCoapServer) {
 		this.coapServer = new CoapServerGateway();
 	}
 		if(this.enableMqttClient) {
 			this.mqttClient = new MqttClientConnector();
 			this.mqttClient.setDataMessageListener(this);}
-		this.persistenceClient = new RedisPersistenceAdapter();
+	//	this.persistenceClient = new RedisPersistenceAdapter();
 		
 	}
 	private void initManager(){  

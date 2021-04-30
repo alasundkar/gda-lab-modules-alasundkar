@@ -192,33 +192,36 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		}
 		return true;
 	}
+	
+	
+	
 //
 //	@Override
-//	protected boolean publishMessage(String topic, byte[] payload, int qos)
-//	{
-//		MqttMessage message = new MqttMessage(payload);
-//		
-//		if (qos < 0 || qos > 2) {
-//			qos = 0;
-//		}
-//		
-//		message.setQos(qos);
-//		
-//		// NOTE: you may want to log the exception stack trace if the call fails
-//		try {
-//			_Logger.info("Publishing message to topic: " + topic);
-//			
-//			this.mqttClient.publish(topic, message);
-//			
-//			return true;
-//		} catch (MqttPersistenceException e) {
-//			_Logger.warning("Persistence exception thrown when publishing to topic: " + topic);
-//		} catch (MqttException e) {
-//			_Logger.warning("MQTT exception thrown when publishing to topic: " + topic);
-//		}
-//		
-//		return false;
-//	}
+	protected boolean publishMessage(String topic, byte[] payload, int qos)
+	{
+		MqttMessage message = new MqttMessage(payload);
+		
+		if (qos < 0 || qos > 2) {
+			qos = 0;
+		}
+		
+		message.setQos(qos);
+		
+		// NOTE: you may want to log the exception stack trace if the call fails
+		try {
+			_Logger.info("Publishing message to topic: " + topic);
+			
+			this.mqttClient.publish(topic, message);
+			
+			return true;
+		} catch (MqttPersistenceException e) {
+			_Logger.warning("Persistence exception thrown when publishing to topic: " + topic);
+		} catch (MqttException e) {
+			_Logger.warning("MQTT exception thrown when publishing to topic: " + topic);
+		}
+		
+		return false;
+	}
 	@Override
 	public boolean subscribeToTopic(ResourceNameEnum topicName, int qos)
 	{
@@ -237,6 +240,34 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		return true;
 	}
 
+	protected boolean subscribeToTopic(String topic, int qos)
+	{
+		//topic = "/ConstrainedDevice/DisplayCmd";
+		// NOTE: you may want to log the exception stack trace if the call fails
+		try {
+			this.mqttClient.subscribe(topic, qos);
+			
+			return true;
+		} catch (MqttException e) {
+			//_Logger.warning("Failed to subscribe to topic: " + topic);
+		}
+		
+		return false;
+	}
+//	@Override
+	public boolean unsubscribeFromTopic(String topicName)
+	{
+		_Logger.log(Level.INFO, "unsubscribeToTopic has been called");
+		try {
+			mqttClient.unsubscribe(topicName);
+		} catch (MqttException e) {
+			// TODO Auto-generated catch block
+			_Logger.warning("Failed to unsubscribe from topic: " + topicName);
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
 	@Override
 	public boolean unsubscribeFromTopic(ResourceNameEnum topicName)
 	{
@@ -321,6 +352,37 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	public void messageArrived(String topic, MqttMessage msg) throws Exception
 	{
 		_Logger.log(Level.INFO, "Message arrived on topic" + topic + " Messgae: " + msg.toString());
+		 if(topic.equals(ConfigConst.CDA_SENSOR_DATA_MSG_RESOURCE))
+	        {
+	            try {
+	                SensorData sensorData =
+	                        DataUtil.getInstance().jsonToSensorData(new String(msg.getPayload()));
+
+	 
+
+	                if (this.dataMsgListener != null) {
+	                    this.dataMsgListener.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sensorData);
+	                }
+	            } catch (Exception e) {
+	                _Logger.warning("Failed to convert message payload to sensorData.");
+	            }
+	        }
+	        else if (topic.equals(ConfigConst.CDA_SYSTEM_PERF_MSG_RESOURCE))
+	        {
+	            try {
+	                SystemPerformanceData sysPerfData =
+	                        DataUtil.getInstance().jsonToSystemPerformanceData(new String(msg.getPayload()));
+
+	 
+
+	                if (this.dataMsgListener != null) {
+	                    this.dataMsgListener.handleSystemPerformanceMessage(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, sysPerfData);
+	                }
+	            } catch (Exception e) {
+	                _Logger.warning("Failed to convert message payload to SystemPerformanceData.");
+	            }
+
+	        }
 	}
 
 	

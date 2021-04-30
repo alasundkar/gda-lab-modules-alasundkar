@@ -72,7 +72,7 @@ public class CloudClientConnectorTest
 	/**
 	 * Test method for {@link programmingtheiot.gda.connection.CloudClientConnector#connectClient()}.
 	 */
-	//@Test
+	@Test
 	public void testConnectAndDisconnect()
 	{
 		int delay = ConfigUtil.getInstance().getInteger(ConfigConst.CLOUD_GATEWAY_SERVICE, ConfigConst.KEEP_ALIVE_KEY, ConfigConst.DEFAULT_KEEP_ALIVE);
@@ -93,7 +93,7 @@ public class CloudClientConnectorTest
 	/**
 	 * Test method for {@link programmingtheiot.gda.connection.CloudClientConnector#publishMessage(programmingtheiot.common.ResourceNameEnum, java.lang.String, int)}.
 	 */
-	//@Test
+	@Test
 	public void testPublishAndSubscribe()
 	{
 		int qos = 2;
