@@ -52,7 +52,7 @@ public class CoapServerGateway
 	{
 		this((ResourceNameEnum[]) null);
 		this.coapServer = new CoapServer();
-	/	this.initServer(ResourceNameEnum.values());
+		this.initServer(ResourceNameEnum.values());
 	}
 
 	/**
