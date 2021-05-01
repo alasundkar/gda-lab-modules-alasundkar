@@ -74,6 +74,11 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		
 		//initClientParameters(ConfigConst.MQTT_GATEWAY_SERVICE);
 	}
+	
+	/**
+	 * This constructor can initiate MQTT service or Cloud service
+	 * @param useCloudGatewayConfig: Contains boolean value that helps decide which service to use, MQTT or CLoud.
+	 */
 	public MqttClientConnector(boolean useCloudGatewayConfig)
 	{
 		super();
@@ -86,48 +91,22 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 			initClientParameters(ConfigConst.MQTT_GATEWAY_SERVICE);
 		}
 	}
-//	{
-//		super();
-//		ConfigUtil configUtil = ConfigUtil.getInstance();
-//
-//		this.host =
-//		    configUtil.getProperty(
-//		        ConfigConst.MQTT_GATEWAY_SERVICE, ConfigConst.HOST_KEY, ConfigConst.DEFAULT_HOST);
-//
-//		this.port =
-//		    configUtil.getInteger(
-//		        ConfigConst.MQTT_GATEWAY_SERVICE, ConfigConst.PORT_KEY, ConfigConst.DEFAULT_MQTT_PORT);
-//
-//		this.protocol = "http";
-//		this.brokerKeepAlive =
-//		    configUtil.getInteger(
-//		        ConfigConst.MQTT_GATEWAY_SERVICE, ConfigConst.KEEP_ALIVE_KEY, ConfigConst.DEFAULT_KEEP_ALIVE);
-//
-//		// paho Java client requires a client ID
-//		this.clientID = MqttClient.generateClientId();
-//
-//		// these are specific to the MQTT connection which will be used during connect
-//		this.persistence = new MemoryPersistence();
-//		this.connOpts = new MqttConnectOptions();
-//
-//		this.connOpts.setKeepAliveInterval(this.brokerKeepAlive);
-//		this.connOpts.setCleanSession(false);
-//		this.connOpts.setAutomaticReconnect(true);
-//
-//		// NOTE: URL does not have a protocol handler for "tcp",
-//		// so we need to construct the URL manually
-//		this.brokerAddr = "tcp" + "://" + this.host + ":" + this.port;
-//	}
-	
-	
+
 	
 	
 	// public methods
-	
+	/**
+	 * This method is used to connect to the mqtt broker.
+	 * It first checks if mqtt is present, if yes then return False
+	 * If not present, then creates a new object of mqttclient with appropriate config parameters(addr, clientID, persistence)
+	 * Initiates connection
+	 * Returns true if successful.
+	 */
 	@Override
 	public boolean connectClient()
 	{
 		try {
+			_Logger.info("MQTT Client Connector is Started...");
 			if (this.mqttClient == null) {
 			    this.mqttClient = new MqttClient(this.brokerAddr, this.clientID, this.persistence);
 			    this.mqttClient.setCallback(this);
@@ -144,7 +123,12 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		}
 		return false;
 	}
-
+	/**
+	 * This method is used to disconnect to the mqtt broker.
+	 * It first checks if mqtt is present, if yes then disconnects the client
+	 * returns true if operation successful
+	 * If not present, return false.
+	 */
 	@Override
 	public boolean disconnectClient()
 	{
@@ -159,14 +143,23 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		}
 		return false;
 	}
-
+	/**
+	 * This method checks if the mqtt is connected or not
+	 * @return Boolean: true if connected, else false
+	 */
 	public boolean isConnected()
 	{
 		if(mqttClient.isConnected())
 			return true;
 		return false;
 	}
-	
+	/**
+	 * This method is used to publish a message to the broker using the topic
+	 * @param topicName : Name of Topic which is referenced from {@link ResourceNameEnum}
+	 * @param msg : String message which is to be published
+	 * @param qos : Int value, Quality of service (value 0,1,2)
+	 * @return : boolean (True if successful)
+	 */
 	@Override
 	public boolean publishMessage(ResourceNameEnum topicName, String msg, int qos)
 	{
@@ -194,7 +187,13 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	}
 	
 	
-	
+	/**
+	 * This method is used to publish a message to the broker using the topic
+	 * @param topicName : Name of Topic which is referenced from {@link ResourceNameEnum}
+	 * @param msg : String message which is to be published
+	 * @param qos : Int value, Quality of service (value 0,1,2)
+	 * @return : boolean (True if successful)
+	 */
 //
 //	@Override
 	protected boolean publishMessage(String topic, byte[] payload, int qos)
@@ -222,6 +221,13 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		
 		return false;
 	}
+	
+	/**
+	 * This method is used to Subscribe to the broker using the topic
+	 * @param topicName : Name of Topic which is referenced from {@link ResourceNameEnum}
+	 * @param qos : Int value, Quality of service (value 0,1,2)
+	 * @return : boolean (True if successful)
+	 */
 	@Override
 	public boolean subscribeToTopic(ResourceNameEnum topicName, int qos)
 	{
@@ -240,6 +246,12 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		return true;
 	}
 
+	/**
+	 * This method is used to Subscribe to the broker using the topic
+	 * @param topicName : Name of Topic which is referenced from {@link ResourceNameEnum}
+	 * @param qos : Int value, Quality of service (value 0,1,2)
+	 * @return : boolean (True if successful)
+	 */
 	protected boolean subscribeToTopic(String topic, int qos)
 	{
 		//topic = "/ConstrainedDevice/DisplayCmd";
@@ -254,6 +266,12 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		
 		return false;
 	}
+	
+	/**
+	 * This method is used to Unsubscribe to the broker using the topic
+	 * @param topicName : Name of Topic which is referenced from {@link ResourceNameEnum}
+	 * @return : boolean (True if successful)
+	 */
 //	@Override
 	public boolean unsubscribeFromTopic(String topicName)
 	{
@@ -268,6 +286,13 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		}
 		return true;
 	}
+	
+	/**
+	 * This method is used to Unsubscribe to the broker using the topic
+	 * @param topicName : Name of Topic which is referenced from {@link ResourceNameEnum}
+	 * @return : boolean (True if successful)
+	 */
+	
 	@Override
 	public boolean unsubscribeFromTopic(ResourceNameEnum topicName)
 	{
@@ -282,7 +307,11 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		}
 		return true;
 	}
-
+	/**
+	 * Listens to any available data.
+	 * @param listener: listener which is referenced from {@link IDataMessageListener}
+	 * @return : Returns true if listener has value
+	 */
 	@Override
 	public boolean setDataMessageListener(IDataMessageListener listener)
 	{
@@ -296,7 +325,11 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	}
 	
 	// callbacks
-	
+	/**
+	 * After establishing MQTT connection with the cloud, it tries to subscribe for messages from cloud.
+	 * @param reconnect: boolean value that determines if reconnection is required
+	 * @param serverURI: String value contains Server URI
+	 */
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI)
 	{
@@ -308,46 +341,36 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		this.subscribeToTopic(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, qos);
 		this.subscribeToTopic(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, qos);
 		this.subscribeToTopic(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, qos);
-		// Option 2
-//		try {
-//			this.mqttClient.subscribe(
-//				ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE.getResourceName(),
-//				qos,
-//				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, this.dataMsgListener));
-//		} catch (MqttException e) {
-//			_Logger.warning("Failed to subscribe to CDA actuator response topic.");
-//		}
-//		try {
-//			this.mqttClient.subscribe(
-//				ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE.getResourceName(),
-//				qos,
-//				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, this.dataMsgListener));
-//		} catch (MqttException e) {
-//			_Logger.warning("Failed to subscribe to CDA actuator response topic.");
-//		}
-//		try {
-//			this.mqttClient.subscribe(
-//				ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName(),
-//				qos,
-//				new ActuatorResponseMessageListener(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, this.dataMsgListener));
-//		} catch (MqttException e) {
-//			_Logger.warning("Failed to subscribe to CDA actuator response topic.");
-//		}
-	}
+		this.subscribeToTopic(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE, qos);
+		this.subscribeToTopic(ResourceNameEnum.CDA_DISPLAY_RESPONSE_RESOURCE, qos);
+		this.subscribeToTopic(ResourceNameEnum.CDA_MGMT_STATUS_CMD_RESOURCE, qos);
+		this.subscribeToTopic(ResourceNameEnum.CDA_MGMT_STATUS_MSG_RESOURCE, qos);
+		
 
+	}
+	/**
+	 * Call this method when Server connection is lost. Logs that the connection is lost.
+	 * @param: t: contains Error message
+	 */
 	@Override
 	public void connectionLost(Throwable t)
 	{
 		_Logger.log(Level.INFO, "Client has successfully connected");
 	}
-	
+	/**
+	 * Notifies that client has successfully published a message.
+	 */
 	@Override
 	public void deliveryComplete(IMqttDeliveryToken token)
 	{
 		_Logger.log(Level.INFO, "client has successfully published a message");
 
 	}
-	
+	/**
+	 * Notifies that the message has arrived. Logs message has arrived.
+	 * @param topic : String topic
+	 * @param msg : MqttMessage type
+	 */
 	@Override
 	public void messageArrived(String topic, MqttMessage msg) throws Exception
 	{
@@ -383,6 +406,87 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	            }
 
 	        }
+	        else if (topic.equals(ConfigConst.CDA_ACTUATOR_RESPONSE_MSG_RESOURCE))
+	        {
+	            try {
+	                SystemPerformanceData sysPerfData =
+	                        DataUtil.getInstance().jsonToSystemPerformanceData(new String(msg.getPayload()));
+
+	 
+
+	                if (this.dataMsgListener != null) {
+	                    this.dataMsgListener.handleSystemPerformanceMessage(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, sysPerfData);
+	                }
+	            } catch (Exception e) {
+	                _Logger.warning("Failed to convert message payload to SystemPerformanceData.");
+	            }
+
+	        }
+	        else if (topic.equals(ConfigConst.CDA_ACTUATOR_CMD_MSG_RESOURCE))
+	        {
+	            try {
+	                SystemPerformanceData sysPerfData =
+	                        DataUtil.getInstance().jsonToSystemPerformanceData(new String(msg.getPayload()));
+
+	 
+
+	                if (this.dataMsgListener != null) {
+	                    this.dataMsgListener.handleSystemPerformanceMessage(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, sysPerfData);
+	                }
+	            } catch (Exception e) {
+	                _Logger.warning("Failed to convert message payload to SystemPerformanceData.");
+	            }
+
+	        }
+	        else if (topic.equals(ConfigConst.CDA_DISPLAY_CMD_MSG_RESOURCE))
+	        {
+	            try {
+	                SystemPerformanceData sysPerfData =
+	                        DataUtil.getInstance().jsonToSystemPerformanceData(new String(msg.getPayload()));
+
+	 
+
+	                if (this.dataMsgListener != null) {
+	                    this.dataMsgListener.handleSystemPerformanceMessage(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, sysPerfData);
+	                }
+	            } catch (Exception e) {
+	                _Logger.warning("Failed to convert message payload to SystemPerformanceData.");
+	            }
+
+	        }
+	        else if (topic.equals(ConfigConst.CDA_MGMT_CMD_MSG_RESOURCE))
+	        {
+	            try {
+	                SystemPerformanceData sysPerfData =
+	                        DataUtil.getInstance().jsonToSystemPerformanceData(new String(msg.getPayload()));
+
+	 
+
+	                if (this.dataMsgListener != null) {
+	                    this.dataMsgListener.handleSystemPerformanceMessage(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, sysPerfData);
+	                }
+	            } catch (Exception e) {
+	                _Logger.warning("Failed to convert message payload to SystemPerformanceData.");
+	            }
+
+	        }
+	        else if (topic.equals(ConfigConst.CDA_MGMT_STATUS_MSG_RESOURCE))
+	        {
+	            try {
+	                SystemPerformanceData sysPerfData =
+	                        DataUtil.getInstance().jsonToSystemPerformanceData(new String(msg.getPayload()));
+
+	 
+
+	                if (this.dataMsgListener != null) {
+	                    this.dataMsgListener.handleSystemPerformanceMessage(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, sysPerfData);
+	                }
+	            } catch (Exception e) {
+	                _Logger.warning("Failed to convert message payload to SystemPerformanceData.");
+	            }
+
+	        }
+		 
 	}
 
 	
@@ -520,7 +624,11 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		}
 	}
 }
-
+/**
+ * Class to handle Actuator Respnse message.
+ * @author rupesh alasundkar
+ *
+ */
 class ActuatorResponseMessageListener implements IMqttMessageListener
 {
 	private ResourceNameEnum resource = null;

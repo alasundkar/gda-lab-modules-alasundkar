@@ -65,9 +65,14 @@ public class CloudClientConnector implements ICloudClient
 	@Override
 	public boolean connectClient()
 	{
+		/*
+		 * Call to connect Client using MQTT.
+		 */
 		_Logger.info("connectClient has been called");
 
 		if (this.mqttClient == null) {
+			//Connects to MQTT Client. Imports configuration from Config file.
+
 			this.mqttClient = new MqttClientConnector(true);
 		}
 		
@@ -75,10 +80,17 @@ public class CloudClientConnector implements ICloudClient
 		
 		return this.mqttClient.isConnected();
 	}
+	/**
+	 * This method is used to disconnect GDA from cloud
+	 * this method disconnects the mqtt connection that is been made to the cloud.
+	 */
 
 	@Override
 	public boolean disconnectClient()
 	{
+		/*
+		 * Call to disconnect Client using MQTT.
+		 */
 		_Logger.info("disconnectClient has been called");
 
 		if(this.mqttClient != null && this.mqttClient.isConnected()) {
@@ -87,6 +99,10 @@ public class CloudClientConnector implements ICloudClient
 		}
 		return false;
 	}
+	
+	/**
+	 * Listens to any data available.
+	 */
 
 	@Override
 	public boolean setDataMessageListener(IDataMessageListener listener)
@@ -100,6 +116,11 @@ public class CloudClientConnector implements ICloudClient
 		
 		return false;
 	}
+	/**
+	 * This method is used to send sensorData to the cloud
+	 * @param : resource : ResourceNameEnum
+	 * @param : data : SensorData that is to be sent
+	 */
 
 	@Override
 	public boolean sendEdgeDataToCloud(ResourceNameEnum resource, SensorData data)
@@ -113,7 +134,11 @@ public class CloudClientConnector implements ICloudClient
 		
 		return false;
 	}
-
+	/**
+	 * This method is used to send SystemPerfData to the cloud
+	 * @param : resource : ResourceNameEnum
+	 * @param : data : SensorData that is to be sent
+	 */
 	@Override
 	public boolean sendEdgeDataToCloud(ResourceNameEnum resource, SystemPerformanceData data)
 	{
@@ -145,6 +170,11 @@ public class CloudClientConnector implements ICloudClient
 		return false;
 	}
 
+	/**
+	 * This method is used to subscribe to cloud client
+	 * Subscribes using the mqtt client initiated by the cvloud connector.
+	 * @param : resource : ResourceNameEnum
+	 */
 	@Override
 	public boolean subscribeToEdgeEvents(ResourceNameEnum resource)
 	{
@@ -172,7 +202,10 @@ public class CloudClientConnector implements ICloudClient
 		
 		return success;
 	}
-
+	/**
+	 * This method is used to unsubscribe to cloud client
+	 * @param : resource : ResourceNameEnum
+	 */
 	@Override
 	public boolean unsubscribeFromEdgeEvents(ResourceNameEnum resource)
 	{
@@ -196,6 +229,11 @@ public class CloudClientConnector implements ICloudClient
 	
 	// private methods
 	
+	/**
+	 * This method is used to create topic name which will then be used to connect to cloud/mqtt client
+	 * @param resource
+	 * @return String topic value
+	 */
 	private String createTopicName(ResourceNameEnum resource)
 	{
 		_Logger.info("createTopicName has been called");
@@ -203,10 +241,20 @@ public class CloudClientConnector implements ICloudClient
 		return this.topicPrefix + resource.getDeviceName() + "/" + resource.getResourceType();
 	}
 	
+	/**
+	 * This method is used to publish message to the cloud service
+	 * @param resource : ResourceNameEnum used to take topics
+	 * @param itemName : String Item sensor/actuator...
+	 * @param payload : String message
+	 * @return boolean
+	 */
 	private boolean publishMessageToCloud(ResourceNameEnum resource, String itemName, String payload)
 	{
 		String topicName = createTopicName(resource) + "-" + itemName;
 		
+			/*
+			 * Call to publish message to cloud using MQTT.
+			 */
 		try {
 			_Logger.finest("Publishing payload value(s) to Ubidots: " + topicName);
 			
