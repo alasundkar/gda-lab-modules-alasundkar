@@ -170,7 +170,7 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	@Override
 	public boolean publishMessage(ResourceNameEnum topicName, String msg, int qos)
 	{
-		_Logger.log(Level.INFO, "publishMessage has been called");
+		_Logger.log(Level.INFO, "publishMessage has been called  string");
 		if(topicName == null)
 			return false;
 		if(qos < 0 || qos > 2)
@@ -233,8 +233,8 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 		try {
 			mqttClient.subscribe(topicName.getResourceName(),qos);
 		} catch (MqttException e) {
-			_Logger.warning("Failed to subscribe to topic: " + topicName);
-			e.printStackTrace();
+	//		_Logger.warning("Failed to subscribe to topic: " + topicName);
+		//	e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -262,8 +262,8 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 			mqttClient.unsubscribe(topicName);
 		} catch (MqttException e) {
 			// TODO Auto-generated catch block
-			_Logger.warning("Failed to unsubscribe from topic: " + topicName);
-			e.printStackTrace();
+	//		_Logger.warning("Failed to unsubscribe from topic: " + topicName);
+		//	e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -276,7 +276,7 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 			mqttClient.unsubscribe(topicName.getResourceName());
 		} catch (MqttException e) {
 			// TODO Auto-generated catch block
-			_Logger.warning("Failed to unsubscribe from topic: " + topicName);
+		//	_Logger.warning("Failed to unsubscribe from topic: " + topicName);
 			e.printStackTrace();
 			return false;
 		}

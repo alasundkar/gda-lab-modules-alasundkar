@@ -201,6 +201,12 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 		 */
 		
 		DataUtil dataUtil = DataUtil.getInstance();
+		_Logger.info("handleSensorMessage from DDM to sendEdgeDataToCloud...");
+
+//		this.cloudClient.sendEdgeDataToCloud(resourceName, data);
+		this.cloudClient.sendEdgeDataToCloud(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, data);
+
+
 		try {
 			if(data.getSensorType() == 1 ) {
 				ActuatorData ad = new ActuatorData();
@@ -215,7 +221,7 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 			{
 				this.persistenceClient.storeData(resourceName.getResourceName(), ConfigConst.DEFAULT_QOS, data);
 				String jsonData = dataUtil.sensorDataToJson(data);
-			//	this.handleUpstreamTransmission(resourceName, jsonData);
+				this.handleUpstreamTransmission(resourceName, jsonData);
 				return true;
 			}
 				
@@ -279,7 +285,10 @@ public class DeviceDataManager<IActuatorDataListener> implements IDataMessageLis
 	
 	
 	
-	
+	private boolean handleUpstreamTransmission(ResourceNameEnum resourceName, String jsonData) {
+		_Logger.fine("Persistence Client is active");
+		return true;
+	}	
 	private boolean handleUpstreamTransmission(ResourceNameEnum resourceName, String jsonData, int qos) {
 		_Logger.fine("Persistence Client is active");
 		return true;

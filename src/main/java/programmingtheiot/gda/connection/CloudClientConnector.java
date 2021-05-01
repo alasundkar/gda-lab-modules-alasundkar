@@ -104,7 +104,7 @@ public class CloudClientConnector implements ICloudClient
 	@Override
 	public boolean sendEdgeDataToCloud(ResourceNameEnum resource, SensorData data)
 	{
-		_Logger.info("sendEdgeDataToCloud SensorData has been called");
+		_Logger.info("sendEdgeDataToCloud SensorData has been called" + data);
 		if (resource != null && data != null) {
 			String payload = DataUtil.getInstance().sensorDataToJson(data);
 			
@@ -211,7 +211,8 @@ public class CloudClientConnector implements ICloudClient
 			_Logger.finest("Publishing payload value(s) to Ubidots: " + topicName);
 			
 			this.mqttClient.publishMessage(topicName, payload.getBytes(), this.qosLevel);
-			
+		//	this.mqttClient.publishMessage("/v1.6/devices/GatewayDevice/SensorMsg-tempsensor", payload.getBytes(), this.qosLevel);
+
 			return true;
 		} catch (Exception e) {
 			_Logger.warning("Failed to publish message to Ubidots: " + topicName);
