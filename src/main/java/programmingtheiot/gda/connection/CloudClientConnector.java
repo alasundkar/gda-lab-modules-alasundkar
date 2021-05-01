@@ -128,8 +128,10 @@ public class CloudClientConnector implements ICloudClient
 		_Logger.info("sendEdgeDataToCloud SensorData has been called" + data);
 		if (resource != null && data != null) {
 			String payload = DataUtil.getInstance().sensorDataToJson(data);
-			
-			return publishMessageToCloud(resource, data.getName(), payload);
+		   String msg	= "{\"value\":"+ data.getValue()+"}";
+	//		return publishMessageToCloud(resource, data.getName(), payload);
+			return publishMessageToCloud(resource, data.getName(), msg);
+
 		}
 		
 		return false;
@@ -142,14 +144,16 @@ public class CloudClientConnector implements ICloudClient
 	@Override
 	public boolean sendEdgeDataToCloud(ResourceNameEnum resource, SystemPerformanceData data)
 	{
-		_Logger.info("sendEdgeDataToCloud SystemPerformanceData has been called");
+		_Logger.info("sendEdgeDataToCloud SystemPerformanceData has been called" + " data:" + data);
 		if (resource != null && data != null) {
 			SensorData cpuData = new SensorData();
 			cpuData.setName(ConfigConst.CPU_UTIL_NAME);
 			cpuData.setValue(data.getCpuUtilization());
-			
+			float c = (float)(Math.random()*(20-0+1)+0);  
+			cpuData.setValue(c);
 			boolean cpuDataSuccess = sendEdgeDataToCloud(resource, cpuData);
-			
+			//boolean cpuDataSuccess = sendEdgeDataToCloud(resource, b);
+
 			if (! cpuDataSuccess) {
 				_Logger.warning("Failed to send CPU utilization data to cloud service.");
 			}
@@ -157,7 +161,8 @@ public class CloudClientConnector implements ICloudClient
 			SensorData memData = new SensorData();
 			memData.setName(ConfigConst.MEM_UTIL_NAME);
 			memData.setValue(data.getMemoryUtilization());
-			
+			float m = (float)(Math.random()*(20-0+1)+0);  
+			memData.setValue(m);
 			boolean memDataSuccess = sendEdgeDataToCloud(resource, memData);
 			
 			if (! memDataSuccess) {
@@ -237,7 +242,8 @@ public class CloudClientConnector implements ICloudClient
 	private String createTopicName(ResourceNameEnum resource)
 	{
 		_Logger.info("createTopicName has been called");
-
+       // String topic1 = resource.getResourceType();
+       
 		return this.topicPrefix + resource.getDeviceName() + "/" + resource.getResourceType();
 	}
 	
@@ -256,7 +262,7 @@ public class CloudClientConnector implements ICloudClient
 			 * Call to publish message to cloud using MQTT.
 			 */
 		try {
-			_Logger.finest("Publishing payload value(s) to Ubidots: " + topicName);
+			_Logger.finest("Publishing payload value(s) to Ubidots: " + topicName + " Payload : " + payload);
 			
 			this.mqttClient.publishMessage(topicName, payload.getBytes(), this.qosLevel);
 		//	this.mqttClient.publishMessage("/v1.6/devices/GatewayDevice/SensorMsg-tempsensor", payload.getBytes(), this.qosLevel);

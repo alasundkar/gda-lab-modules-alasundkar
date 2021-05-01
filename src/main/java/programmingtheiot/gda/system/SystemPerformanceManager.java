@@ -79,16 +79,16 @@ public class SystemPerformanceManager
 		_Logger.info("memUtilTask = " + memUtil);
 		
 		//_Logger.debug("CPU utilization: " + cpuUtil + ", Mem utilization: " + memUtil);
-//		
-//		SystemPerformanceData spd = new SystemPerformanceData();
-//		//spd.setLocationID(this.locationID);
-//		spd.setCpuUtilization(cpuUtil);
-//		spd.setMemoryUtilization(memUtil);
-//		
-//		if (this.dataMsgListener != null) {
-//			this.dataMsgListener.handleSystemPerformanceMessage(
-//				ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE, spd);
-//		}
+		
+		SystemPerformanceData spd = new SystemPerformanceData();
+		//spd.setLocationID(this.locationID);
+		spd.setCpuUtilization(cpuUtil);
+		spd.setMemoryUtilization(memUtil);
+		
+		if (this.dataMsgListener != null) {
+			this.dataMsgListener.handleSystemPerformanceMessage(
+				ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE, spd);
+		}
 	}
 	
 	public void setDataMessageListener(IDataMessageListener listener)

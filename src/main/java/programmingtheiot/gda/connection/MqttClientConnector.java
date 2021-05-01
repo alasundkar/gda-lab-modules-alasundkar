@@ -11,6 +11,7 @@ package programmingtheiot.gda.connection;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +57,7 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 	int brokerKeepAlive,port;
 	MqttClient mqttClient;
 	boolean enableEncryption,useCleanSession,enableAutoReconnect;
-
+	long time = 0;
 //	private MqttClient mqttClient = null;
 	private IDataMessageListener dataMsgListener = null;
 	private boolean useCloudGatewayConfig = false;
@@ -198,19 +199,77 @@ public class MqttClientConnector implements IPubSubClient, MqttCallbackExtended
 //	@Override
 	protected boolean publishMessage(String topic, byte[] payload, int qos)
 	{
+	//	String message1 = "{\"value\":"+"13"+"}";
+
+		//MqttMessage message = new MqttMessage(message1.getBytes());
 		MqttMessage message = new MqttMessage(payload);
-		
+
 		if (qos < 0 || qos > 2) {
 			qos = 0;
 		}
-		
+		String result = String.format(topic);
+		String msg = new String(payload);
 		message.setQos(qos);
-		
+//		if( topic.contains("TempSensor")){
+//		//topic = topic.replaceAll("\\s", "");
+//		topic = "/v1.6/devices/ConstrainedDevice/SensorMsg-TempSensor";
+//		_Logger.info("this is tempsensor topic " +topic);
+//		
+//		try {
+//			_Logger.info("Publishing message to topic: " + topic +  " and " + result +  "  , payload :" + msg + " message :"+ message  );
+//			
+//			//this.mqttClient.publish(topic, message);
+//			this.mqttClient.publish("/v1.6/devices/ConstrainedDevice/SensorMsg-TempSensor", message);
+//TimeUnit time = TimeUnit.SECONDS;
+//			
+//			try {
+//				// Calling the sleep method on the object of TimeUnit Class
+//				time.sleep(5);;
+//			} catch (InterruptedException e) {
+//				System.out.println("Interrupted Exception Caught"+ e);
+//			}
+//			return true;
+//		} catch (MqttPersistenceException e) {
+//			_Logger.warning("Persistence exception thrown when publishing to topic: " + topic);
+//		} catch (MqttException e) {
+//			_Logger.warning("MQTT exception thrown when publishing to topic: " + topic);
+//		}
+//		
+//		}
+//		else if( topic.contains("PressureSensor")) {
+//			topic = "/v1.6/devices/ConstrainedDevice/SensorMsg-PressureSensor";
+//			_Logger.info("this is PressureSensor topic " +topic);
+//		}
+//		else if( topic.contains("HumiditySensor")) {
+//			topic = "/v1.6/devices/ConstrainedDevice/SensorMsg-HumiditySensor";
+//			_Logger.info("this is HumiditySensor topic " +topic);
+//		}
+//		else if( topic.contains("MemUtil")) {
+//			topic = "/v1.6/devices/ConstrainedDevice/SystemPerfMsg-MemUtil";
+//			_Logger.info("this is MemUtil topic " +topic);
+//		}
+//		else if( topic.contains("CpuUtil")) {
+//			topic = "/v1.6/devices/ConstrainedDevice/SystemPerfMsg-CpuUtil";
+//			_Logger.info("this is CpuUtil topic " +topic);
+//		}
+//		
 		// NOTE: you may want to log the exception stack trace if the call fails
 		try {
-			_Logger.info("Publishing message to topic: " + topic);
+			_Logger.info("Publishing message to topic: " + topic +  " and " + result +  "  , payload :" + msg + " message :"+ message  );
 			
+			//this.mqttClient.publish(topic, message);
 			this.mqttClient.publish(topic, message);
+			
+			TimeUnit time = TimeUnit.SECONDS;
+			
+			try {
+				// Calling the sleep method on the object of TimeUnit Class
+				time.sleep(5);;
+				System.out.println("adding delay");
+
+			} catch (InterruptedException e) {
+				System.out.println("Interrupted Exception Caught"+ e);
+			}
 			
 			return true;
 		} catch (MqttPersistenceException e) {
